@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module'
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard'
 import { throwMissingEnvVar } from './common/utils/env.utils'
 import { UserModule } from './user/user.module'
+import { AccountModule } from './account/account.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { UserModule } from './user/user.module'
     }),
     UserModule,
     AuthModule,
+    AccountModule,
   ],
   controllers: [],
   providers: [

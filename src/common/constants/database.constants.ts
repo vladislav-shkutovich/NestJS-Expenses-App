@@ -1,1 +1,5 @@
-export const USER_MODEL = 'User'
+export const USER_MODEL = 'User' as const
+
+export const ACCOUNT_MODEL = 'Account' as const
+
+export const CURRENCY_MODEL = 'Currency' as const
