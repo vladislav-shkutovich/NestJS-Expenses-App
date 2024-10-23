@@ -12,3 +12,5 @@ export const EXCHANGE_RATES_ROUTE = 'exchange-rates' as const
 export const TRANSFERS_ROUTE = 'transfers' as const
 
 export const OPERATIONS_ROUTE = 'operations' as const
+
+export const CATEGORIES_ROUTE = 'categories' as const
