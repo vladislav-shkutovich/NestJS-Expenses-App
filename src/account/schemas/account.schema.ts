@@ -1,10 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { Types } from 'mongoose'
 
-import {
-  CURRENCY_MODEL,
-  USER_MODEL,
-} from '../../common/constants/database.constants'
+import { USER_MODEL } from '../../common/constants/database.constants'
 import { AccountType } from '../account.types'
 
 @Schema({ versionKey: false, timestamps: true })
@@ -14,8 +11,8 @@ export class Account {
   @Prop({ type: Types.ObjectId, ref: USER_MODEL, required: true })
   userId: Types.ObjectId
 
-  @Prop({ ref: CURRENCY_MODEL, required: true })
-  currencyCode: string
+  @Prop({ required: true })
+  currencyCode: string // Currency.code ref
 
   @Prop({ required: true })
   name: string
