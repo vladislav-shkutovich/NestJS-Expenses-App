@@ -5,3 +5,5 @@ export const ACCOUNT_MODEL = 'Account' as const
 export const CURRENCY_MODEL = 'Currency' as const
 
 export const EXCHANGE_RATE_MODEL = 'ExchangeRate' as const
+
+export const TRANSFER_MODEL = 'Transfer' as const

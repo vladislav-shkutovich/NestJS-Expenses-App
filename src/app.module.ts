@@ -9,6 +9,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard'
 import { throwMissingEnvVar } from './common/utils/env.utils'
 import { CurrencyModule } from './currency/currency.module'
 import { ExchangeRateModule } from './exchange-rate/exchange-rate.module'
+import { TransferModule } from './transfer/transfer.module'
 import { UserModule } from './user/user.module'
 
 @Module({
@@ -30,6 +31,7 @@ import { UserModule } from './user/user.module'
     AccountModule,
     CurrencyModule,
     ExchangeRateModule,
+    TransferModule,
   ],
   controllers: [],
   providers: [

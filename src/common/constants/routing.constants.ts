@@ -8,3 +8,5 @@ export const ACCOUNTS_ROUTE = 'accounts' as const
 export const CURRENCIES_ROUTE = 'currencies' as const
 
 export const EXCHANGE_RATES_ROUTE = 'exchange-rates' as const
+
+export const TRANSFERS_ROUTE = 'transfers' as const
