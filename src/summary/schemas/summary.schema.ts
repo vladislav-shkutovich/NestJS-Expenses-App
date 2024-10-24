@@ -7,6 +7,8 @@ import { CurrencyEntry, CurrencyEntrySchema } from './currency-entry.schema'
 
 @Schema({ versionKey: false, timestamps: true })
 export class Summary {
+  _id: Types.ObjectId
+
   @Prop({ type: Types.ObjectId, ref: USER_MODEL, required: true })
   userId: Types.ObjectId
 
