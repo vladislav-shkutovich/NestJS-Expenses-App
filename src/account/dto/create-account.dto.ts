@@ -4,7 +4,6 @@ import {
   IsNotEmpty,
   IsNumber,
   IsOptional,
-  IsPositive,
   IsString,
 } from 'class-validator'
 
@@ -27,7 +26,6 @@ export class CreateAccountDto {
   isSavings?: boolean
 
   @IsNumber()
-  @IsPositive()
   @IsOptional()
   balance?: number
 }
