@@ -11,6 +11,7 @@ import { throwMissingEnvVar } from './common/utils/env.utils'
 import { CurrencyModule } from './currency/currency.module'
 import { ExchangeRateModule } from './exchange-rate/exchange-rate.module'
 import { OperationModule } from './operation/operation.module'
+import { SummaryModule } from './summary/summary.module'
 import { TransferModule } from './transfer/transfer.module'
 import { UserModule } from './user/user.module'
 
@@ -36,6 +37,7 @@ import { UserModule } from './user/user.module'
     TransferModule,
     OperationModule,
     CategoryModule,
+    SummaryModule,
   ],
   controllers: [],
   providers: [

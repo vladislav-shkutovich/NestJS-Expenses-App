@@ -11,3 +11,5 @@ export const TRANSFER_MODEL = 'Transfer' as const
 export const OPERATION_MODEL = 'Operation' as const
 
 export const CATEGORY_MODEL = 'Category' as const
+
+export const SUMMARY_MODEL = 'Summary' as const
