@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer'
 import {
   IsDate,
   IsMongoId,
@@ -19,6 +20,7 @@ export class CreateOperationDto {
   amount: number
 
   @IsDate()
+  @Type(() => Date)
   date: Date
 
   @IsString()
