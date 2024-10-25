@@ -1,9 +1,18 @@
-import { Controller } from '@nestjs/common'
+import { Controller, Get, Query } from '@nestjs/common'
 
 import { EXCHANGE_RATES_ROUTE } from '../common/constants/routing.constants'
+import { ExchangeRateQueryParamsDto } from './dto/exchange-rate-query-params.dto'
 import { ExchangeRateService } from './exchange-rate.service'
+import { ExchangeRate } from './schemas/exchange-rate.schema'
 
 @Controller(EXCHANGE_RATES_ROUTE)
 export class ExchangeRateController {
   constructor(private readonly exchangeRateService: ExchangeRateService) {}
+
+  @Get()
+  async getExchangeRates(
+    @Query() query: ExchangeRateQueryParamsDto,
+  ): Promise<ExchangeRate[]> {
+    return await this.exchangeRateService.getExchangeRates(query)
+  }
 }
