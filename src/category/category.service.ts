@@ -23,11 +23,11 @@ export class CategoryService {
     return await this.categoryDatabaseService.getCategoryById(id)
   }
 
-  async getCategorysByUser(
+  async getCategoriesByUser(
     userId: Types.ObjectId,
     options: CategoryQueryParamsDto,
   ): Promise<Category[]> {
-    return await this.categoryDatabaseService.getCategorysByUser(
+    return await this.categoryDatabaseService.getCategoriesByUser(
       userId,
       options,
     )

@@ -26,7 +26,7 @@ export class CategoryDatabaseService {
     return {} as Category
   }
 
-  async getCategorysByUser(
+  async getCategoriesByUser(
     userId: Types.ObjectId,
     options: CategoryQueryParamsDto,
   ): Promise<Category[]> {

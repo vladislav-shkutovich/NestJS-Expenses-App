@@ -35,11 +35,11 @@ export class CategoryController {
   }
 
   @Get('/user/:id')
-  async getCategorysByUser(
+  async getCategoriesByUser(
     @Param() params: IdParamDto,
     @Query() query: CategoryQueryParamsDto,
   ): Promise<Category[]> {
-    return await this.categoryService.getCategorysByUser(params.id, query)
+    return await this.categoryService.getCategoriesByUser(params.id, query)
   }
 
   @Patch(':id')
