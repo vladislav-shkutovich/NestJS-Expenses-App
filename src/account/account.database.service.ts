@@ -30,7 +30,7 @@ export class AccountDatabaseService {
   ): Promise<Account[]> {
     console.error('mock userId', userId)
     console.error('mock options', options)
-    return {} as Account[]
+    return [] as Account[]
   }
 
   async updateAccount(
