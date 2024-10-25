@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer'
 import {
   IsDate,
   IsNotEmpty,
@@ -7,7 +8,6 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator'
-import { Type } from 'class-transformer'
 
 import { TransferTargetDto } from './transfer-target.dto'
 
@@ -25,6 +25,7 @@ export class CreateTransferDto {
   exchangeRate: number
 
   @IsDate()
+  @Type(() => Date)
   date: Date
 
   @IsString()
