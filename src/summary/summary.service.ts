@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common'
 
-import { Types } from 'mongoose'
 import { SummaryQueryParamsDto } from './dto/summary-query-params.dto'
 import type { Summary } from './schemas/summary.schema'
 import { SummaryDatabaseService } from './summary.database.service'
@@ -11,10 +10,7 @@ export class SummaryService {
     private readonly summaryDatabaseService: SummaryDatabaseService,
   ) {}
 
-  async getSummariesByUser(
-    userId: Types.ObjectId,
-    options: SummaryQueryParamsDto,
-  ): Promise<Summary[]> {
-    return await this.summaryDatabaseService.getSummariesByUser(userId, options)
+  async getSummariesByUser(options: SummaryQueryParamsDto): Promise<Summary[]> {
+    return await this.summaryDatabaseService.getSummariesByUser(options)
   }
 }

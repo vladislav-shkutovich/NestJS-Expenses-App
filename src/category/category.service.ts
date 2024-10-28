@@ -24,13 +24,9 @@ export class CategoryService {
   }
 
   async getCategoriesByUser(
-    userId: Types.ObjectId,
     options: CategoryQueryParamsDto,
   ): Promise<Category[]> {
-    return await this.categoryDatabaseService.getCategoriesByUser(
-      userId,
-      options,
-    )
+    return await this.categoryDatabaseService.getCategoriesByUser(options)
   }
 
   async updateCategory(

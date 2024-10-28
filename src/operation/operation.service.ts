@@ -26,13 +26,9 @@ export class OperationService {
   }
 
   async getOperationsByUser(
-    userId: Types.ObjectId,
     options: OperationQueryParamsDto,
   ): Promise<Operation[]> {
-    return await this.operationDatabaseService.getOperationsByUser(
-      userId,
-      options,
-    )
+    return await this.operationDatabaseService.getOperationsByUser(options)
   }
 
   async updateOperation(

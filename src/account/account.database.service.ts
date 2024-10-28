@@ -24,11 +24,7 @@ export class AccountDatabaseService {
     return {} as Account
   }
 
-  async getAccountsByUser(
-    userId: Types.ObjectId,
-    options: AccountQueryParamsDto,
-  ): Promise<Account[]> {
-    console.error('mock userId', userId)
+  async getAccountsByUser(options: AccountQueryParamsDto): Promise<Account[]> {
     console.error('mock options', options)
     return [] as Account[]
   }

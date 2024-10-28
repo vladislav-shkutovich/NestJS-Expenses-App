@@ -3,6 +3,10 @@ import { IsDate, IsMongoId, IsOptional } from 'class-validator'
 import { Types } from 'mongoose'
 
 export class OperationQueryParamsDto {
+  @IsMongoId()
+  @Type(() => Types.ObjectId)
+  userId: Types.ObjectId
+
   @IsOptional()
   @IsDate()
   @Type(() => Date)

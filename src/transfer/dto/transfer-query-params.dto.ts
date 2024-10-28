@@ -3,6 +3,10 @@ import { IsDate, IsMongoId, IsOptional, IsString } from 'class-validator'
 import { Types } from 'mongoose'
 
 export class TransferQueryParamsDto {
+  @IsMongoId()
+  @Type(() => Types.ObjectId)
+  userId: Types.ObjectId
+
   @IsOptional()
   @IsDate()
   @Type(() => Date)

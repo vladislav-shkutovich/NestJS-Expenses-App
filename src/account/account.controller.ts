@@ -34,12 +34,11 @@ export class AccountController {
     return await this.accountService.getAccountById(params.id)
   }
 
-  @Get('/user/:id')
+  @Get()
   async getAccountsByUser(
-    @Param() params: IdParamDto,
     @Query() query: AccountQueryParamsDto,
   ): Promise<Account[]> {
-    return await this.accountService.getAccountsByUser(params.id, query)
+    return await this.accountService.getAccountsByUser(query)
   }
 
   @Patch(':id')

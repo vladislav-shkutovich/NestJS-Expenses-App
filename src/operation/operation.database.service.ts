@@ -27,10 +27,8 @@ export class OperationDatabaseService {
   }
 
   async getOperationsByUser(
-    userId: Types.ObjectId,
     options: OperationQueryParamsDto,
   ): Promise<Operation[]> {
-    console.error('mock userId', userId)
     console.error('mock options', options)
     return [] as Operation[]
   }

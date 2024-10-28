@@ -1,7 +1,12 @@
 import { Type } from 'class-transformer'
-import { IsBoolean, IsOptional, IsString } from 'class-validator'
+import { IsBoolean, IsMongoId, IsOptional, IsString } from 'class-validator'
+import { Types } from 'mongoose'
 
 export class AccountQueryParamsDto {
+  @IsMongoId()
+  @Type(() => Types.ObjectId)
+  userId: Types.ObjectId
+
   @IsOptional()
   @IsString()
   currencyCode?: string

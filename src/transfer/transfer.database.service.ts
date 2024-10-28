@@ -27,10 +27,8 @@ export class TransferDatabaseService {
   }
 
   async getTransfersByUser(
-    userId: Types.ObjectId,
     options: TransferQueryParamsDto,
   ): Promise<Transfer[]> {
-    console.error('mock userId', userId)
     console.error('mock options', options)
     return [] as Transfer[]
   }

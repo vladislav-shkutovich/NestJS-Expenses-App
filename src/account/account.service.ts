@@ -21,11 +21,8 @@ export class AccountService {
     return await this.accountDatabaseService.getAccountById(id)
   }
 
-  async getAccountsByUser(
-    userId: Types.ObjectId,
-    options: AccountQueryParamsDto,
-  ): Promise<Account[]> {
-    return await this.accountDatabaseService.getAccountsByUser(userId, options)
+  async getAccountsByUser(options: AccountQueryParamsDto): Promise<Account[]> {
+    return await this.accountDatabaseService.getAccountsByUser(options)
   }
 
   async updateAccount(

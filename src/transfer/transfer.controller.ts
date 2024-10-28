@@ -34,12 +34,11 @@ export class TransferController {
     return await this.transferService.getTransferById(params.id)
   }
 
-  @Get('/user/:id')
+  @Get()
   async getTransfersByUser(
-    @Param() params: IdParamDto,
     @Query() query: TransferQueryParamsDto,
   ): Promise<Transfer[]> {
-    return await this.transferService.getTransfersByUser(params.id, query)
+    return await this.transferService.getTransfersByUser(query)
   }
 
   @Patch(':id')

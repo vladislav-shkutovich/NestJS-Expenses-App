@@ -27,10 +27,8 @@ export class CategoryDatabaseService {
   }
 
   async getCategoriesByUser(
-    userId: Types.ObjectId,
     options: CategoryQueryParamsDto,
   ): Promise<Category[]> {
-    console.error('mock userId', userId)
     console.error('mock options', options)
     return [] as Category[]
   }

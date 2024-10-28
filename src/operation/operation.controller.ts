@@ -34,12 +34,11 @@ export class OperationController {
     return await this.operationService.getOperationById(params.id)
   }
 
-  @Get('/user/:id')
+  @Get()
   async getOperationsByUser(
-    @Param() params: IdParamDto,
     @Query() query: OperationQueryParamsDto,
   ): Promise<Operation[]> {
-    return await this.operationService.getOperationsByUser(params.id, query)
+    return await this.operationService.getOperationsByUser(query)
   }
 
   @Patch(':id')

@@ -24,13 +24,9 @@ export class TransferService {
   }
 
   async getTransfersByUser(
-    userId: Types.ObjectId,
     options: TransferQueryParamsDto,
   ): Promise<Transfer[]> {
-    return await this.transferDatabaseService.getTransfersByUser(
-      userId,
-      options,
-    )
+    return await this.transferDatabaseService.getTransfersByUser(options)
   }
 
   async updateTransfer(
