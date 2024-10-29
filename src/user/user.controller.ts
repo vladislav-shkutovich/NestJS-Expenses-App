@@ -14,8 +14,8 @@ import { Public } from '../common/decorators/public.decorator'
 import { IdParamDto } from '../common/dto/id-param.dto'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
-import type { User } from './schemas/user.schema'
 import { UserService } from './user.service'
+import type { UserWithoutPassword } from './user.types'
 
 @Controller(USERS_ROUTE)
 export class UserController {
@@ -23,12 +23,14 @@ export class UserController {
 
   @Public()
   @Post()
-  async createUser(@Body() createUserDto: CreateUserDto): Promise<User> {
+  async createUser(
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<UserWithoutPassword> {
     return await this.userService.createUser(createUserDto)
   }
 
   @Get(':id')
-  async getUserById(@Param() params: IdParamDto): Promise<User> {
+  async getUserById(@Param() params: IdParamDto): Promise<UserWithoutPassword> {
     return await this.userService.getUserById(params.id)
   }
 
@@ -36,7 +38,7 @@ export class UserController {
   async updateUser(
     @Param() params: IdParamDto,
     @Body() updateUserDto: UpdateUserDto,
-  ): Promise<User> {
+  ): Promise<UserWithoutPassword> {
     return await this.userService.updateUser(params.id, updateUserDto)
   }
 
