@@ -10,12 +10,12 @@ export class OperationQueryParamsDto {
   @IsOptional()
   @IsDate()
   @Type(() => Date)
-  from?: Date
+  dateFrom?: Date
 
   @IsOptional()
   @IsDate()
   @Type(() => Date)
-  to?: Date
+  dateTo?: Date
 
   @IsOptional()
   @IsMongoId()

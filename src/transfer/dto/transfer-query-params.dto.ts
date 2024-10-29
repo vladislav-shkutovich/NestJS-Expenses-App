@@ -10,19 +10,28 @@ export class TransferQueryParamsDto {
   @IsOptional()
   @IsDate()
   @Type(() => Date)
-  from?: Date
+  dateFrom?: Date
 
   @IsOptional()
   @IsDate()
   @Type(() => Date)
-  to?: Date
+  dateTo?: Date
 
   @IsOptional()
   @IsMongoId()
   @Type(() => Types.ObjectId)
-  accountId?: Types.ObjectId
+  fromAccountId?: Types.ObjectId
+
+  @IsOptional()
+  @IsMongoId()
+  @Type(() => Types.ObjectId)
+  toAccountId?: Types.ObjectId
 
   @IsOptional()
   @IsString()
-  currencyCode?: string
+  fromCurrencyCode?: string
+
+  @IsOptional()
+  @IsString()
+  toCurrencyCode?: string
 }

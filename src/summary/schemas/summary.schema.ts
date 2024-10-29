@@ -2,8 +2,42 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { Types } from 'mongoose'
 
 import { USER_MODEL } from '../../common/constants/database.constants'
-import { AccountEntry, AccountEntrySchema } from './account-entry.schema'
-import { CurrencyEntry, CurrencyEntrySchema } from './currency-entry.schema'
+
+@Schema({ _id: false })
+class Totals {
+  @Prop({ required: true })
+  startingBalances: number
+
+  @Prop({ required: true })
+  endingBalances: number
+
+  @Prop({ required: true })
+  totalIncome: number
+
+  @Prop({ required: true })
+  totalExpense: number
+}
+
+const TotalsSchema = SchemaFactory.createForClass(Totals)
+
+@Schema({ _id: false })
+class AccountEntry {
+  @Prop({ type: TotalsSchema, required: true })
+  totals: Totals
+}
+
+export const AccountEntrySchema = SchemaFactory.createForClass(AccountEntry)
+
+@Schema({ _id: false })
+class CurrencyEntry {
+  @Prop({ type: TotalsSchema, required: true })
+  totals: Totals
+
+  @Prop({ type: TotalsSchema, required: true })
+  convertedTotals: Totals
+}
+
+const CurrencyEntrySchema = SchemaFactory.createForClass(CurrencyEntry)
 
 @Schema({ versionKey: false, timestamps: true })
 export class Summary {
@@ -13,10 +47,10 @@ export class Summary {
   userId: Types.ObjectId
 
   @Prop({ type: Date, required: true })
-  from: Date
+  dateFrom: Date
 
   @Prop({ type: Date, required: true })
-  to: Date
+  dateTo: Date
 
   @Prop({ type: Map, of: AccountEntrySchema, required: true })
   accounts: Map<string, AccountEntry>

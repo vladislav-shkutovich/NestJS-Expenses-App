@@ -10,10 +10,10 @@ export class SummaryQueryParamsDto {
   @IsOptional()
   @IsDate()
   @Type(() => Date)
-  from?: Date
+  dateFrom?: Date
 
   @IsOptional()
   @IsDate()
   @Type(() => Date)
-  to?: Date
+  dateTo?: Date
 }

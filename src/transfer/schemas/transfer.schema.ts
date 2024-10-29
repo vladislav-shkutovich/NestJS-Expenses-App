@@ -1,8 +1,24 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { Types } from 'mongoose'
 
-import { USER_MODEL } from '../../common/constants/database.constants'
-import { TransferTarget, TransferTargetSchema } from './transfer-target.schema'
+import {
+  ACCOUNT_MODEL,
+  USER_MODEL,
+} from '../../common/constants/database.constants'
+
+@Schema({ _id: false })
+class TransferTarget {
+  @Prop({ type: Types.ObjectId, ref: ACCOUNT_MODEL, required: true })
+  accountId: Types.ObjectId
+
+  @Prop({ required: true })
+  currencyCode: string // Currency.code ref
+
+  @Prop({ required: true })
+  amount: number
+}
+
+const TransferTargetSchema = SchemaFactory.createForClass(TransferTarget)
 
 @Schema({ versionKey: false, timestamps: true })
 export class Transfer {
