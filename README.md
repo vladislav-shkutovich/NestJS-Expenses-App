@@ -22,10 +22,6 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
 ## Installation
 
 ```bash
@@ -61,16 +57,34 @@ $ yarn run test:e2e
 $ yarn run test:cov
 ```
 
-## Support
+## Migrations
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+#### Create a New Migration Template
 
-## Stay in touch
+Generate a new migration file with a timestamp and your specified name.
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```
+$ yarn run create-migration-template <migration-name>
+```
 
-## License
+Example:
 
-Nest is [MIT licensed](LICENSE).
+```
+$ yarn run create-migration-template add-users-collection
+```
+
+#### Run Migrations Up
+
+Apply all pending migrations to update the database schema.
+
+```
+$ yarn run migrations:up
+```
+
+#### Run Migrations Down
+
+Revert the last applied migration.
+
+```
+$ yarn run migrations:down
+```
