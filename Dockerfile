@@ -4,7 +4,7 @@ COPY package.json yarn.lock ./
 
 FROM base AS development
 RUN yarn install --frozen-lockfile
-CMD ["yarn", "start:dev"]
+CMD ["sh", "-c", "yarn migrations:up && yarn start:dev"]
 
 FROM base AS builder
 RUN yarn install --frozen-lockfile
