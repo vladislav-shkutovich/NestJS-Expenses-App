@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { Model, Types } from 'mongoose'
+import { Model } from 'mongoose'
 
 import { CURRENCY_MODEL } from '../common/constants/database.constants'
+import { NotFoundError } from '../common/errors/errors'
 import type { Currency } from './schemas/currency.schema'
 
 @Injectable()
@@ -12,11 +13,17 @@ export class CurrencyDatabaseService {
   ) {}
 
   async getAllCurrencies(): Promise<Currency[]> {
-    return [] as Currency[]
+    const currencies = await this.currencyModel.find()
+    return currencies.map((currency) => currency.toObject())
   }
 
-  async getCurrencyById(id: Types.ObjectId): Promise<Currency> {
-    console.error('mock id', id)
-    return {} as Currency
+  async getCurrencyByCode(code: string): Promise<Currency> {
+    const currencyByCode = await this.currencyModel.findOne({ code })
+
+    if (!currencyByCode) {
+      throw new NotFoundError(`Currency with code ${code} not found`)
+    }
+
+    return currencyByCode.toObject()
   }
 }

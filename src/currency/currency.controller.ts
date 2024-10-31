@@ -1,8 +1,8 @@
 import { Controller, Get, Param } from '@nestjs/common'
 
 import { CURRENCIES_ROUTE } from '../common/constants/routing.constants'
-import { IdParamDto } from '../common/dto/id-param.dto'
 import { CurrencyService } from './currency.service'
+import { CurrencyParamDto } from './dto/currency-param.dto'
 import type { Currency } from './schemas/currency.schema'
 
 @Controller(CURRENCIES_ROUTE)
@@ -14,8 +14,10 @@ export class CurrencyController {
     return await this.currencyService.getAllCurrencies()
   }
 
-  @Get(':id')
-  async getCurrencyById(@Param() params: IdParamDto): Promise<Currency> {
-    return await this.currencyService.getCurrencyById(params.id)
+  @Get(':code')
+  async getCurrencyByCode(
+    @Param() params: CurrencyParamDto,
+  ): Promise<Currency> {
+    return await this.currencyService.getCurrencyByCode(params.code)
   }
 }
