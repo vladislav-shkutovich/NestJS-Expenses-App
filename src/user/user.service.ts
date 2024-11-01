@@ -12,6 +12,7 @@ import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 import type { User } from './schemas/user.schema'
 import { UserDatabaseService } from './user.database.service'
+import type { UserWithoutPassword } from './user.types'
 
 const scryptAsync = promisify(scrypt)
 
@@ -36,7 +37,7 @@ export class UserService {
     return timingSafeEqual(hashKeyBuff, derivedKey as Buffer)
   }
 
-  async createUser(createUserDto: CreateUserDto): Promise<User> {
+  async createUser(createUserDto: CreateUserDto): Promise<UserWithoutPassword> {
     const isDuplicate = await this.userDatabaseService.isUserExistByQuery({
       $or: [
         { username: createUserDto.username },
@@ -58,7 +59,7 @@ export class UserService {
     })
   }
 
-  async getUserById(id: Types.ObjectId): Promise<User> {
+  async getUserById(id: Types.ObjectId): Promise<UserWithoutPassword> {
     return await this.userDatabaseService.getUserById(id)
   }
 
@@ -84,7 +85,7 @@ export class UserService {
   async updateUser(
     id: Types.ObjectId,
     updateUserDto: UpdateUserDto,
-  ): Promise<User> {
+  ): Promise<UserWithoutPassword> {
     const updateParams = { ...updateUserDto }
 
     if (updateUserDto.password) {
