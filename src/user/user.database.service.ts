@@ -70,12 +70,12 @@ export class UserDatabaseService {
   }
 
   async findUserByQuery(query: FilterQuery<User>): Promise<User | null> {
-    const user = await this.userModel.findOne(query)
+    const user = await this.userModel.findOne(query).lean()
 
     if (!user) {
       return null
     }
 
-    return user.toObject()
+    return user
   }
 }

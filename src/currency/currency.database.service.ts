@@ -13,17 +13,16 @@ export class CurrencyDatabaseService {
   ) {}
 
   async getAllCurrencies(): Promise<Currency[]> {
-    const currencies = await this.currencyModel.find()
-    return currencies.map((currency) => currency.toObject())
+    return await this.currencyModel.find().lean()
   }
 
   async getCurrencyByCode(code: string): Promise<Currency> {
-    const currencyByCode = await this.currencyModel.findOne({ code })
+    const currencyByCode = await this.currencyModel.findOne({ code }).lean()
 
     if (!currencyByCode) {
       throw new NotFoundError(`Currency with code ${code} not found`)
     }
 
-    return currencyByCode.toObject()
+    return currencyByCode
   }
 }

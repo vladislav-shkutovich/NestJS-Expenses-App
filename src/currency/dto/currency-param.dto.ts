@@ -1,11 +1,8 @@
-import { Transform } from 'class-transformer'
-import { IsString, Matches } from 'class-validator'
+import { IsISO4217CurrencyCode, IsString, IsUppercase } from 'class-validator'
 
 export class CurrencyParamDto {
   @IsString()
-  @Matches(/^[A-Za-z]{3}$/, {
-    message: 'Currency code must consist of three letters',
-  })
-  @Transform(({ value }) => value.toUpperCase())
+  @IsISO4217CurrencyCode()
+  @IsUppercase()
   code: string
 }
