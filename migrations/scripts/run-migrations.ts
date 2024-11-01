@@ -23,19 +23,6 @@ const setupUmzug = (db: Db): Umzug<Db> => {
     context: db,
     migrations: {
       glob: 'migrations/versioned/*.ts',
-      resolve: ({ name, path, context }) => {
-        if (!path) {
-          throw new Error(`Failed to get path for migration ${name}`)
-        }
-
-        const migration = require(path).default
-
-        return {
-          name,
-          up: () => migration.up({ context }),
-          down: () => migration.down({ context }),
-        }
-      },
     },
     storage: new MongoDBStorage({
       collection: db.collection(MIGRATIONS_COLLECTION),

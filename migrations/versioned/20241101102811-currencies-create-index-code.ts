@@ -1,16 +1,12 @@
 import { Db } from 'mongodb'
 
-import currencies from '../data/currencies.json'
-
-const migration = {
+module.exports = {
   up: async ({ context }: { context: Db }) => {
     const collection = context.collection('currencies')
-    await collection.insertMany(currencies)
+    await collection.createIndex({ code: 1 }, { unique: true })
   },
   down: async ({ context }: { context: Db }) => {
     const collection = context.collection('currencies')
-    await collection.deleteMany({})
+    await collection.dropIndex('code_1')
   },
 }
-
-export default migration

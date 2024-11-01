@@ -13,7 +13,7 @@ const getTimestamp = (): string => {
 const getMigrationTemplate = (): string => {
   return `import { Db } from 'mongodb'
 
-const migration = {
+module.exports = {
   up: async ({ context }: { context: Db }) => {
     // Implement migration up
   },
@@ -21,8 +21,6 @@ const migration = {
     // Implement migration down
   },
 }
-
-export default migration
 `
 }
 
