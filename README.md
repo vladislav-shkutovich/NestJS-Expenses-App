@@ -78,7 +78,7 @@ $ yarn run create-migration-template add-users-collection
 Apply all pending migrations to update the database schema.
 
 ```
-$ yarn run migrations:up
+$ MONGODB_URI='value' yarn run migrations:up
 ```
 
 #### Run Migrations Down
@@ -86,5 +86,5 @@ $ yarn run migrations:up
 Revert the last applied migration.
 
 ```
-$ yarn run migrations:down
+$ MONGODB_URI='value' yarn run migrations:down
 ```
