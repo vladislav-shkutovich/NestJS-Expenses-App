@@ -1,6 +1,6 @@
 import { Db } from 'mongodb'
 
-import currencies from '../data/20241101102849-currencies-seed-collection.data.json'
+import currencies from './data/20241101102849-currencies-seed-collection.data.json'
 
 module.exports = {
   up: async ({ context }: { context: Db }) => {

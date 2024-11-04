@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
-const MIGRATIONS_DIR = path.resolve(__dirname, '../versioned')
+const MIGRATIONS_DIR = path.resolve(__dirname, '..')
 
 const getTimestamp = (): string => {
   return new Date()

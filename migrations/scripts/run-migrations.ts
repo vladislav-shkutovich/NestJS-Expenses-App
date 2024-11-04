@@ -1,4 +1,3 @@
-import 'dotenv/config'
 import { Db, MongoClient } from 'mongodb'
 import { MongoDBStorage, Umzug } from 'umzug'
 
@@ -8,7 +7,9 @@ const MONGODB_URI = process.env.MONGODB_URI
 const MIGRATIONS_COLLECTION = 'migrations'
 
 if (!MONGODB_URI) {
-  console.error('Failed to get MONGODB_URI env variable')
+  console.error(
+    'MONGODB_URI was not provided by the CLI params. Please make sure you provide this variable (example: MONGODB_URI="value" yarn migrations:up)',
+  )
   process.exit(1)
 }
 
@@ -22,7 +23,7 @@ const setupUmzug = (db: Db): Umzug<Db> => {
   return new Umzug({
     context: db,
     migrations: {
-      glob: 'migrations/versioned/*.ts',
+      glob: 'migrations/*.ts',
     },
     storage: new MongoDBStorage({
       collection: db.collection(MIGRATIONS_COLLECTION),
