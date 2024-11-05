@@ -17,6 +17,7 @@ RUN yarn install --frozen-lockfile --production
 FROM base AS production
 COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/migrations ./migrations
 EXPOSE 3000
 USER node
 CMD ["node", "dist/main.js"]
