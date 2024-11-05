@@ -59,32 +59,50 @@ $ yarn run test:cov
 
 ## Migrations
 
-#### Create a New Migration Template
+#### Create a new migration template
 
 Generate a new migration file with a timestamp and your specified name.
 
 ```
-$ yarn run create-migration-template <migration-name>
+$ MONGODB_URI='value' yarn run migrate:create <migration-name>.mjs
 ```
 
 Example:
 
 ```
-$ yarn run create-migration-template add-users-collection
+$ MONGODB_URI='value' yarn run migrate:create currencies-seed-collection.mjs
 ```
 
-#### Run Migrations Up
+#### Run migrations up
 
 Apply all pending migrations to update the database schema.
 
 ```
-$ MONGODB_URI='value' yarn run migrations:up
+$ MONGODB_URI='value' yarn run migrate:up
 ```
 
-#### Run Migrations Down
+#### Run migrations down
 
 Revert the last applied migration.
 
 ```
-$ MONGODB_URI='value' yarn run migrations:down
+$ MONGODB_URI='value' yarn run migrate:down
 ```
+
+#### List pending migrations
+
+Show all currently pending migrations.
+
+```
+$ MONGODB_URI='value' yarn run migrate:pending
+```
+
+#### List executed migrations
+
+Show all executed migrations.
+
+```
+$ MONGODB_URI='value' yarn run migrate:executed
+```
+
+For the rest possible migration commands visit official [Umzug documentation](https://github.com/sequelize/umzug?tab=readme-ov-file#cli-usage).

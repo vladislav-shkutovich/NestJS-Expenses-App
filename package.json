@@ -19,9 +19,11 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "migrations:up": "ts-node ./migrations/scripts/run-migrations.ts up",
-    "migrations:down": "ts-node ./migrations/scripts/run-migrations.ts down",
-    "create-migration-template": "ts-node ./migrations/scripts/create-migration-template.ts"
+    "migrate:create": "node migrations/scripts/migrator.mjs create --folder migrations --name",
+    "migrate:up": "node migrations/scripts/migrator.mjs up",
+    "migrate:down": "node migrations/scripts/migrator.mjs down",
+    "migrate:pending": "node migrations/scripts/migrator.mjs pending",
+    "migrate:executed": "node migrations/scripts/migrator.mjs executed"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
