@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer'
 import {
   IsDate,
+  IsMongoId,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -8,10 +9,15 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator'
+import { Types } from 'mongoose'
 
 import { TransferTargetDto } from './transfer-target.dto'
 
 export class CreateTransferDto {
+  @IsMongoId()
+  @Type(() => Types.ObjectId)
+  userId: Types.ObjectId
+
   @ValidateNested()
   @Type(() => TransferTargetDto)
   from: TransferTargetDto
