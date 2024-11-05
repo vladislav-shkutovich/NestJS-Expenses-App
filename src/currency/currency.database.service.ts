@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { Model } from 'mongoose'
+import { FilterQuery, Model } from 'mongoose'
 
 import { CURRENCY_MODEL } from '../common/constants/database.constants'
-import { NotFoundError } from '../common/errors/errors'
+import { CurrencyQueryParamsDto } from './dto/currency-query-params.dto'
 import type { Currency } from './schemas/currency.schema'
 
 @Injectable()
@@ -12,17 +12,13 @@ export class CurrencyDatabaseService {
     @InjectModel(CURRENCY_MODEL) private currencyModel: Model<Currency>,
   ) {}
 
-  async getAllCurrencies(): Promise<Currency[]> {
-    return await this.currencyModel.find().lean()
-  }
+  async getCurrencies(options: CurrencyQueryParamsDto): Promise<Currency[]> {
+    const filter: FilterQuery<Currency> = {}
 
-  async getCurrencyByCode(code: string): Promise<Currency> {
-    const currencyByCode = await this.currencyModel.findOne({ code }).lean()
-
-    if (!currencyByCode) {
-      throw new NotFoundError(`Currency with code ${code} not found`)
+    if (options.code) {
+      filter.code = { $in: options.code }
     }
 
-    return currencyByCode
+    return await this.currencyModel.find(filter).lean()
   }
 }

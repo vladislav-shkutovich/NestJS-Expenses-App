@@ -8,7 +8,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule)
   app.useGlobalInterceptors(new ErrorsInterceptor())
   app.useGlobalPipes(
-    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
   )
   await app.listen(3000)
 }
