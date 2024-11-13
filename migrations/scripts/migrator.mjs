@@ -1,6 +1,7 @@
 import { MongoClient } from 'mongodb'
 import { MongoDBStorage, Umzug } from 'umzug'
-import { readFileSync } from 'node:fs'
+import { readFile } from 'node:fs/promises'
+import { resolve } from 'node:path'
 
 const MONGODB_URI = process.env.MONGODB_URI
 const MIGRATIONS_COLLECTION = 'migrations'
@@ -25,12 +26,12 @@ try {
       glob: 'migrations/*.mjs',
     },
     create: {
-      template: (filepath) => [
+      template: async (filepath) => [
         [
           filepath,
-          readFileSync(
-            'migrations/templates/migration.template.mjs',
-          ).toString(),
+          await readFile(
+            resolve('migrations/templates/migration.template.mjs'),
+          ),
         ],
       ],
     },
