@@ -64,21 +64,23 @@ $ yarn run test:cov
 Generate a new migration file with a timestamp and your specified name.
 
 ```
-$ MONGODB_URI='value' yarn run migrate:create <migration-name>.mjs
+$ MONGODB_URI='value' yarn run migrate create --folder migrations --name <migration-name>.mjs
 ```
 
 Example:
 
 ```
-$ MONGODB_URI='value' yarn run migrate:create currencies-seed-collection.mjs
+$ MONGODB_URI='value' yarn run migrate create --folder migrations --name currencies-seed-collection.mjs
 ```
+
+You need to specify `--folder migrations` only for creating the first migration.
 
 #### Run migrations up
 
 Apply all pending migrations to update the database schema.
 
 ```
-$ MONGODB_URI='value' yarn run migrate:up
+$ MONGODB_URI='value' yarn run migrate up
 ```
 
 #### Run migrations down
@@ -86,7 +88,7 @@ $ MONGODB_URI='value' yarn run migrate:up
 Revert the last applied migration.
 
 ```
-$ MONGODB_URI='value' yarn run migrate:down
+$ MONGODB_URI='value' yarn run migrate down
 ```
 
 #### List pending migrations
@@ -94,7 +96,7 @@ $ MONGODB_URI='value' yarn run migrate:down
 Show all currently pending migrations.
 
 ```
-$ MONGODB_URI='value' yarn run migrate:pending
+$ MONGODB_URI='value' yarn run migrate pending
 ```
 
 #### List executed migrations
@@ -102,7 +104,7 @@ $ MONGODB_URI='value' yarn run migrate:pending
 Show all executed migrations.
 
 ```
-$ MONGODB_URI='value' yarn run migrate:executed
+$ MONGODB_URI='value' yarn run migrate executed
 ```
 
 For the rest possible migration commands visit official [Umzug documentation](https://github.com/sequelize/umzug?tab=readme-ov-file#cli-usage).

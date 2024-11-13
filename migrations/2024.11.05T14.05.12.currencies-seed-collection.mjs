@@ -1,9 +1,4 @@
-import { readFileSync } from 'node:fs'
-
-const currenciesJson = readFileSync(
-  'migrations/data/2024.11.05T14.05.12.currencies-seed-collection.data.json',
-)
-const currencies = JSON.parse(currenciesJson)
+import currencies from './data/2024.11.05T14.05.12.currencies-seed-collection.data.json' with { type: 'json' }
 
 export async function up({ context }) {
   const collection = context.collection('currencies')

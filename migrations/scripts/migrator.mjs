@@ -12,14 +12,11 @@ if (!MONGODB_URI) {
   process.exit(1)
 }
 
-const getDatabaseClient = async (uri) => {
-  const client = new MongoClient(uri)
-  await client.connect()
-  return client
-}
+const client = new MongoClient(MONGODB_URI)
 
-const setupUmzug = async () => {
-  const client = await getDatabaseClient(MONGODB_URI)
+let exitCode = 0
+try {
+  await client.connect()
   const db = client.db()
 
   const umzug = new Umzug({
@@ -43,15 +40,12 @@ const setupUmzug = async () => {
     logger: console,
   })
 
-  return { umzug, client }
+  await umzug.runAsCLI()
+} catch (err) {
+  exitCode = 1
+  console.error('Migration failed:', err)
+} finally {
+  await client.close()
 }
 
-const { umzug, client } = await setupUmzug()
-
-umzug
-  .runAsCLI()
-  .catch((err) => {
-    console.error('Migration failed:', err)
-    process.exit(1)
-  })
-  .finally(() => client.close())
+process.exit(exitCode)
