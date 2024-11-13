@@ -10,9 +10,6 @@ export class Currency {
 
   @Prop({ required: true })
   name: string
-
-  @Prop({ required: true })
-  symbol: string
 }
 
 export const CurrencySchema = SchemaFactory.createForClass(Currency)

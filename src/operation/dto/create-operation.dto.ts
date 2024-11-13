@@ -11,9 +11,15 @@ import { Types } from 'mongoose'
 
 export class CreateOperationDto {
   @IsMongoId()
+  @Type(() => Types.ObjectId)
+  userId: Types.ObjectId
+
+  @IsMongoId()
+  @Type(() => Types.ObjectId)
   accountId: Types.ObjectId
 
   @IsMongoId()
+  @Type(() => Types.ObjectId)
   categoryId: Types.ObjectId
 
   @IsNumber()

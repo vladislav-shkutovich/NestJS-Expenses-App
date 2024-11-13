@@ -22,10 +22,6 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
 ## Installation
 
 ```bash
@@ -61,16 +57,54 @@ $ yarn run test:e2e
 $ yarn run test:cov
 ```
 
-## Support
+## Migrations
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+#### Create a new migration template
 
-## Stay in touch
+Generate a new migration file with a timestamp and your specified name.
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```
+$ MONGODB_URI='value' yarn run migrate create --folder migrations --name <migration-name>.mjs
+```
 
-## License
+Example:
 
-Nest is [MIT licensed](LICENSE).
+```
+$ MONGODB_URI='value' yarn run migrate create --folder migrations --name currencies-seed-collection.mjs
+```
+
+You need to specify `--folder migrations` only for creating the first migration.
+
+#### Run migrations up
+
+Apply all pending migrations to update the database schema.
+
+```
+$ MONGODB_URI='value' yarn run migrate up
+```
+
+#### Run migrations down
+
+Revert the last applied migration.
+
+```
+$ MONGODB_URI='value' yarn run migrate down
+```
+
+#### List pending migrations
+
+Show all currently pending migrations.
+
+```
+$ MONGODB_URI='value' yarn run migrate pending
+```
+
+#### List executed migrations
+
+Show all executed migrations.
+
+```
+$ MONGODB_URI='value' yarn run migrate executed
+```
+
+For the rest possible migration commands visit official [Umzug documentation](https://github.com/sequelize/umzug?tab=readme-ov-file#cli-usage).
