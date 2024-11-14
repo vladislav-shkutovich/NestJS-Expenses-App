@@ -7,6 +7,7 @@ import { AccountQueryParamsDto } from './dto/account-query-params.dto'
 import { CreateAccountDto } from './dto/create-account.dto'
 import { UpdateAccountDto } from './dto/update-account.dto'
 import type { Account } from './schemas/account.schema'
+import { NotFoundError } from '../common/errors/errors'
 
 @Injectable()
 export class AccountDatabaseService {
@@ -20,8 +21,13 @@ export class AccountDatabaseService {
   }
 
   async getAccountById(id: Types.ObjectId): Promise<Account> {
-    console.error('mock id', id)
-    return {} as Account
+    const accountById = await this.accountModel.findById(id).lean()
+
+    if (!accountById) {
+      throw new NotFoundError(`Account with id ${id} not found`)
+    }
+
+    return accountById
   }
 
   async getAccountsByUser(options: AccountQueryParamsDto): Promise<Account[]> {
