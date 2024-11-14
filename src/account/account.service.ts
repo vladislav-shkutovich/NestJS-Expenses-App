@@ -50,6 +50,16 @@ export class AccountService {
   }
 
   async getAccountsByUser(options: AccountQueryParamsDto): Promise<Account[]> {
+    const { userId } = options
+
+    const isUserExist = await this.userService.isUserExistByQuery({
+      _id: userId,
+    })
+
+    if (!isUserExist) {
+      throw new NotFoundError(`User with userId ${userId} not found`)
+    }
+
     return await this.accountDatabaseService.getAccountsByUser(options)
   }
 

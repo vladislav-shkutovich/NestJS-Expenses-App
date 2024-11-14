@@ -8,6 +8,7 @@ import { CreateAccountDto } from './dto/create-account.dto'
 import { UpdateAccountDto } from './dto/update-account.dto'
 import type { Account } from './schemas/account.schema'
 import { NotFoundError } from '../common/errors/errors'
+import { removeUndefined } from '../common/utils/formatting.utils'
 
 @Injectable()
 export class AccountDatabaseService {
@@ -31,8 +32,8 @@ export class AccountDatabaseService {
   }
 
   async getAccountsByUser(options: AccountQueryParamsDto): Promise<Account[]> {
-    console.error('mock options', options)
-    return [] as Account[]
+    const filteredOptions = removeUndefined(options)
+    return await this.accountModel.find(filteredOptions).lean()
   }
 
   async updateAccount(

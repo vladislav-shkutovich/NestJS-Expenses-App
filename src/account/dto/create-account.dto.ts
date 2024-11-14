@@ -1,6 +1,7 @@
 import {
   IsBoolean,
   IsEnum,
+  IsISO4217CurrencyCode,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -15,8 +16,7 @@ export class CreateAccountDto {
   @TransformToValidObjectId()
   userId: Types.ObjectId
 
-  @IsString()
-  @IsNotEmpty()
+  @IsISO4217CurrencyCode()
   currencyCode: string
 
   @IsString()
