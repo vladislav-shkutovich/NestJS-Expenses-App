@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common'
 import { CurrencyDatabaseService } from './currency.database.service'
 import { CurrencyQueryParamsDto } from './dto/currency-query-params.dto'
 import type { Currency } from './schemas/currency.schema'
+import { FilterQuery } from 'mongoose'
 
 @Injectable()
 export class CurrencyService {
@@ -12,5 +13,9 @@ export class CurrencyService {
 
   async getCurrencies(options: CurrencyQueryParamsDto): Promise<Currency[]> {
     return await this.currencyDatabaseService.getCurrencies(options)
+  }
+
+  async isCurrencyExistByQuery(query: FilterQuery<Currency>): Promise<boolean> {
+    return await this.currencyDatabaseService.isCurrencyExistByQuery(query)
   }
 }

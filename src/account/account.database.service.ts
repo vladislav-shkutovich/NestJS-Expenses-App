@@ -15,8 +15,8 @@ export class AccountDatabaseService {
   ) {}
 
   async createAccount(createAccountDto: CreateAccountDto): Promise<Account> {
-    console.error('mock createAccountDto', createAccountDto)
-    return {} as Account
+    const createdAccount = await this.accountModel.create(createAccountDto)
+    return createdAccount.toObject()
   }
 
   async getAccountById(id: Types.ObjectId): Promise<Account> {
