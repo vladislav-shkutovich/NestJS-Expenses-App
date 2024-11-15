@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common'
 
 import { Types } from 'mongoose'
-import { NotFoundError, ValidationError } from '../common/errors/errors'
+import {
+  ConflictError,
+  NotFoundError,
+  ValidationError,
+} from '../common/errors/errors'
 import { UserService } from '../user/user.service'
 import { AccountDatabaseService } from './account.database.service'
 import { AccountType } from './account.types'
@@ -69,6 +73,14 @@ export class AccountService {
   }
 
   async deleteAccount(id: Types.ObjectId): Promise<void> {
+    const { balance } = await this.getAccountById(id)
+
+    if (balance !== 0) {
+      throw new ConflictError(
+        'Account with a non-zero balance cannot be deleted. You must clear the account first by transferring funds from it',
+      )
+    }
+
     return await this.accountDatabaseService.deleteAccount(id)
   }
 }
