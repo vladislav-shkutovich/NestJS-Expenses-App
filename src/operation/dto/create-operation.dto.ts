@@ -1,7 +1,6 @@
 import { Type } from 'class-transformer'
 import {
   IsDate,
-  IsMongoId,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -9,17 +8,16 @@ import {
 } from 'class-validator'
 import { Types } from 'mongoose'
 
+import { TransformToValidObjectId } from '../../common/decorators/transform-to-valid-objectid.decorator'
+
 export class CreateOperationDto {
-  @IsMongoId()
-  @Type(() => Types.ObjectId)
+  @TransformToValidObjectId()
   userId: Types.ObjectId
 
-  @IsMongoId()
-  @Type(() => Types.ObjectId)
+  @TransformToValidObjectId()
   accountId: Types.ObjectId
 
-  @IsMongoId()
-  @Type(() => Types.ObjectId)
+  @TransformToValidObjectId()
   categoryId: Types.ObjectId
 
   @IsNumber()

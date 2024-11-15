@@ -1,11 +1,16 @@
 import { Type } from 'class-transformer'
-import { IsDate, IsNumber, IsOptional, IsString } from 'class-validator'
+import {
+  IsDate,
+  IsISO4217CurrencyCode,
+  IsNumber,
+  IsOptional,
+} from 'class-validator'
 
 export class ExchangeRateQueryParamsDto {
-  @IsString()
+  @IsISO4217CurrencyCode()
   baseCurrency: string
 
-  @IsString()
+  @IsISO4217CurrencyCode()
   targetCurrency: string
 
   @IsOptional()

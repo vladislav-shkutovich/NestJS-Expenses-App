@@ -1,18 +1,16 @@
-import { Type } from 'class-transformer'
 import {
   IsBoolean,
   IsEnum,
-  IsMongoId,
   IsNotEmpty,
   IsOptional,
   IsString,
 } from 'class-validator'
 import { Types } from 'mongoose'
 
+import { TransformToValidObjectId } from '../../common/decorators/transform-to-valid-objectid.decorator'
 import { CategoryType } from '../category.types'
 export class CreateCategoryDto {
-  @IsMongoId()
-  @Type(() => Types.ObjectId)
+  @TransformToValidObjectId()
   userId: Types.ObjectId
 
   @IsString()

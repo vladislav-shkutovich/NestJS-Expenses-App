@@ -1,10 +1,11 @@
 import { Type } from 'class-transformer'
-import { IsDate, IsMongoId, IsOptional } from 'class-validator'
+import { IsDate, IsOptional } from 'class-validator'
 import { Types } from 'mongoose'
 
+import { TransformToValidObjectId } from '../../common/decorators/transform-to-valid-objectid.decorator'
+
 export class SummaryQueryParamsDto {
-  @IsMongoId()
-  @Type(() => Types.ObjectId)
+  @TransformToValidObjectId()
   userId: Types.ObjectId
 
   @IsOptional()
