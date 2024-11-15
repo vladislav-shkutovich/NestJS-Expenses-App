@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common'
 
 import { Types } from 'mongoose'
 import { NotFoundError, ValidationError } from '../common/errors/errors'
-import { CurrencyService } from '../currency/currency.service'
 import { UserService } from '../user/user.service'
 import { AccountDatabaseService } from './account.database.service'
 import { AccountType } from './account.types'
@@ -15,12 +14,11 @@ import type { Account } from './schemas/account.schema'
 export class AccountService {
   constructor(
     private readonly accountDatabaseService: AccountDatabaseService,
-    private readonly currencyService: CurrencyService,
     private readonly userService: UserService,
   ) {}
 
   async createAccount(createAccountDto: CreateAccountDto): Promise<Account> {
-    const { userId, currencyCode, accountType, isSavings } = createAccountDto
+    const { userId, accountType, isSavings } = createAccountDto
 
     if (accountType === AccountType.LOAN && isSavings) {
       throw new ValidationError('Loan account type cannot be marked as savings')
@@ -32,14 +30,6 @@ export class AccountService {
 
     if (!isUserExist) {
       throw new NotFoundError(`User with userId ${userId} not found`)
-    }
-
-    const isCurrencyExist = await this.currencyService.isCurrencyExistByQuery({
-      code: currencyCode,
-    })
-
-    if (!isCurrencyExist) {
-      throw new NotFoundError(`Currency with code ${currencyCode} not found`)
     }
 
     return await this.accountDatabaseService.createAccount(createAccountDto)

@@ -21,9 +21,4 @@ export class CurrencyDatabaseService {
 
     return await this.currencyModel.find(filter).lean()
   }
-
-  async isCurrencyExistByQuery(query: FilterQuery<Currency>): Promise<boolean> {
-    const currency = await this.currencyModel.findOne(query, { _id: 1 })
-    return !!currency
-  }
 }

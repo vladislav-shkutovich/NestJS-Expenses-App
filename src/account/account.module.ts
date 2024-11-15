@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
 
 import { ACCOUNT_MODEL } from '../common/constants/database.constants'
-import { CurrencyModule } from '../currency/currency.module'
 import { UserModule } from '../user/user.module'
 import { AccountController } from './account.controller'
 import { AccountDatabaseService } from './account.database.service'
@@ -12,7 +11,6 @@ import { AccountSchema } from './schemas/account.schema'
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: ACCOUNT_MODEL, schema: AccountSchema }]),
-    CurrencyModule,
     UserModule,
   ],
   controllers: [AccountController],
