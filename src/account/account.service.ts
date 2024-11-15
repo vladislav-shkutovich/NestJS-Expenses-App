@@ -57,6 +57,14 @@ export class AccountService {
     id: Types.ObjectId,
     updateAccountDto: UpdateAccountDto,
   ): Promise<Account> {
+    const { accountType } = await this.getAccountById(id)
+
+    if (accountType === AccountType.LOAN && updateAccountDto.accountType) {
+      throw new ValidationError(
+        'Changing the account type for loan accounts is not possible',
+      )
+    }
+
     return await this.accountDatabaseService.updateAccount(id, updateAccountDto)
   }
 

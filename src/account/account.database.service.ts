@@ -40,9 +40,17 @@ export class AccountDatabaseService {
     id: Types.ObjectId,
     updateAccountDto: UpdateAccountDto,
   ): Promise<Account> {
-    console.error('mock id', id)
-    console.error('mock updateAccountDto', updateAccountDto)
-    return {} as Account
+    const updatedAccount = await this.accountModel
+      .findByIdAndUpdate(id, updateAccountDto, {
+        new: true,
+      })
+      .lean()
+
+    if (!updatedAccount) {
+      throw new NotFoundError(`Account with id ${id} not found`)
+    }
+
+    return updatedAccount
   }
 
   async deleteAccount(id: Types.ObjectId): Promise<void> {
