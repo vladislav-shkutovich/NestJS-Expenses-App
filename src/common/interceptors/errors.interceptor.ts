@@ -20,6 +20,8 @@ export class ErrorsInterceptor implements NestInterceptor {
     return next.handle().pipe(
       catchError((error) =>
         throwError(() => {
+          console.error(error)
+
           if (error instanceof NotFoundError) {
             return new NotFoundException(error.message)
           }

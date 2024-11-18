@@ -1,12 +1,14 @@
 import { IsBoolean, IsEnum, IsOptional } from 'class-validator'
 import { Types } from 'mongoose'
 
-import { TransformToBoolean } from '../../common/decorators/transform-to-boolean.decorator'
-import { TransformToValidObjectId } from '../../common/decorators/transform-to-valid-objectid.decorator'
+import { IsValidObjectId } from '../../common/decorators/is-valid-objectid.decorator'
+import { TransformBooleanStringToBoolean } from '../../common/decorators/transform-boolean-string-to-boolean.decorator'
+import { TransformStringToObjectId } from '../../common/decorators/transform-string-to-objectid.decorator'
 import { CategoryType } from '../category.types'
 
 export class CategoryQueryParamsDto {
-  @TransformToValidObjectId()
+  @TransformStringToObjectId()
+  @IsValidObjectId()
   userId: Types.ObjectId
 
   @IsOptional()
@@ -14,7 +16,7 @@ export class CategoryQueryParamsDto {
   type: CategoryType
 
   @IsOptional()
+  @TransformBooleanStringToBoolean()
   @IsBoolean()
-  @TransformToBoolean()
   isArchived?: boolean
 }

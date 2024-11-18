@@ -54,9 +54,9 @@ export class AccountDatabaseService {
   }
 
   async deleteAccount(id: Types.ObjectId): Promise<void> {
-    const deletedAccount = await this.accountModel.findByIdAndDelete(id)
+    const { deletedCount } = await this.accountModel.deleteOne({ _id: id })
 
-    if (!deletedAccount) {
+    if (deletedCount === 0) {
       throw new NotFoundError(`Account with id ${id} not found`)
     }
   }

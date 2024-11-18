@@ -6,12 +6,14 @@ import {
 } from 'class-validator'
 import { Types } from 'mongoose'
 
-import { TransformToBoolean } from '../../common/decorators/transform-to-boolean.decorator'
-import { TransformToValidObjectId } from '../../common/decorators/transform-to-valid-objectid.decorator'
+import { IsValidObjectId } from '../../common/decorators/is-valid-objectid.decorator'
+import { TransformBooleanStringToBoolean } from '../../common/decorators/transform-boolean-string-to-boolean.decorator'
+import { TransformStringToObjectId } from '../../common/decorators/transform-string-to-objectid.decorator'
 import { AccountType } from '../account.types'
 
 export class AccountQueryParamsDto {
-  @TransformToValidObjectId()
+  @TransformStringToObjectId()
+  @IsValidObjectId()
   userId: Types.ObjectId
 
   @IsOptional()
@@ -23,7 +25,7 @@ export class AccountQueryParamsDto {
   accountType?: AccountType
 
   @IsOptional()
+  @TransformBooleanStringToBoolean()
   @IsBoolean()
-  @TransformToBoolean()
   isSavings?: boolean
 }

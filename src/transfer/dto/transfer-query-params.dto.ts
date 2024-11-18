@@ -2,10 +2,12 @@ import { Type } from 'class-transformer'
 import { IsDate, IsISO4217CurrencyCode, IsOptional } from 'class-validator'
 import { Types } from 'mongoose'
 
-import { TransformToValidObjectId } from '../../common/decorators/transform-to-valid-objectid.decorator'
+import { IsValidObjectId } from '../../common/decorators/is-valid-objectid.decorator'
+import { TransformStringToObjectId } from '../../common/decorators/transform-string-to-objectid.decorator'
 
 export class TransferQueryParamsDto {
-  @TransformToValidObjectId()
+  @TransformStringToObjectId()
+  @IsValidObjectId()
   userId: Types.ObjectId
 
   @IsOptional()
@@ -19,11 +21,13 @@ export class TransferQueryParamsDto {
   dateTo?: Date
 
   @IsOptional()
-  @TransformToValidObjectId()
+  @TransformStringToObjectId()
+  @IsValidObjectId()
   fromAccountId?: Types.ObjectId
 
   @IsOptional()
-  @TransformToValidObjectId()
+  @TransformStringToObjectId()
+  @IsValidObjectId()
   toAccountId?: Types.ObjectId
 
   @IsOptional()

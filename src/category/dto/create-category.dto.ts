@@ -7,10 +7,12 @@ import {
 } from 'class-validator'
 import { Types } from 'mongoose'
 
-import { TransformToValidObjectId } from '../../common/decorators/transform-to-valid-objectid.decorator'
+import { IsValidObjectId } from '../../common/decorators/is-valid-objectid.decorator'
+import { TransformStringToObjectId } from '../../common/decorators/transform-string-to-objectid.decorator'
 import { CategoryType } from '../category.types'
 export class CreateCategoryDto {
-  @TransformToValidObjectId()
+  @TransformStringToObjectId()
+  @IsValidObjectId()
   userId: Types.ObjectId
 
   @IsString()

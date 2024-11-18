@@ -1,10 +1,12 @@
 import { IsISO4217CurrencyCode, IsNumber } from 'class-validator'
 import { Types } from 'mongoose'
 
-import { TransformToValidObjectId } from '../../common/decorators/transform-to-valid-objectid.decorator'
+import { IsValidObjectId } from '../../common/decorators/is-valid-objectid.decorator'
+import { TransformStringToObjectId } from '../../common/decorators/transform-string-to-objectid.decorator'
 
 export class TransferTargetDto {
-  @TransformToValidObjectId()
+  @TransformStringToObjectId()
+  @IsValidObjectId()
   accountId: Types.ObjectId
 
   @IsISO4217CurrencyCode()
