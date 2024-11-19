@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose'
 import { Model, Types } from 'mongoose'
 
 import { CATEGORY_MODEL } from '../common/constants/database.constants'
+import { NotFoundError } from '../common/errors/errors'
 import { CategoryQueryParamsDto } from './dto/category-query-params.dto'
 import { CreateCategoryDto } from './dto/create-category.dto'
 import { UpdateCategoryDto } from './dto/update-category.dto'
@@ -22,8 +23,13 @@ export class CategoryDatabaseService {
   }
 
   async getCategoryById(id: Types.ObjectId): Promise<Category> {
-    console.error('mock id', id)
-    return {} as Category
+    const categoryById = await this.categoryModel.findById(id).lean()
+
+    if (!categoryById) {
+      throw new NotFoundError(`Category with id ${id} not found`)
+    }
+
+    return categoryById
   }
 
   async getCategoriesByUser(
