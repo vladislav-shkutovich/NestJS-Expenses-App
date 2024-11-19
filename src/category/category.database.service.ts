@@ -44,9 +44,17 @@ export class CategoryDatabaseService {
     id: Types.ObjectId,
     updateCategoryDto: UpdateCategoryDto,
   ): Promise<Category> {
-    console.error('mock id', id)
-    console.error('mock updateCategoryDto', updateCategoryDto)
-    return {} as Category
+    const updatedCategory = await this.categoryModel
+      .findByIdAndUpdate(id, updateCategoryDto, {
+        new: true,
+      })
+      .lean()
+
+    if (!updatedCategory) {
+      throw new NotFoundError(`Category with id ${id} not found`)
+    }
+
+    return updatedCategory
   }
 
   async deleteCategory(id: Types.ObjectId): Promise<void> {

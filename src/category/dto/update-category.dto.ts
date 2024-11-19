@@ -1,5 +1,22 @@
-import { PartialType } from '@nestjs/mapped-types'
+import {
+  IsBoolean,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator'
 
-import { CreateCategoryDto } from './create-category.dto'
+import { CategoryType } from '../category.types'
 
-export class UpdateCategoryDto extends PartialType(CreateCategoryDto) {}
+export class UpdateCategoryDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string
+
+  @IsEnum(CategoryType)
+  type: CategoryType
+
+  @IsBoolean()
+  @IsOptional()
+  isArchived?: boolean
+}
