@@ -4,6 +4,7 @@ import { Model, Types } from 'mongoose'
 
 import { CATEGORY_MODEL } from '../common/constants/database.constants'
 import { NotFoundError } from '../common/errors/errors'
+import { removeUndefined } from '../common/utils/formatting.utils'
 import { CategoryQueryParamsDto } from './dto/category-query-params.dto'
 import { CreateCategoryDto } from './dto/create-category.dto'
 import { UpdateCategoryDto } from './dto/update-category.dto'
@@ -35,8 +36,8 @@ export class CategoryDatabaseService {
   async getCategoriesByUser(
     options: CategoryQueryParamsDto,
   ): Promise<Category[]> {
-    console.error('mock options', options)
-    return [] as Category[]
+    const filteredOptions = removeUndefined(options)
+    return await this.categoryModel.find(filteredOptions).lean()
   }
 
   async updateCategory(

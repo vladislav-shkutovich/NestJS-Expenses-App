@@ -39,6 +39,16 @@ export class CategoryService {
   async getCategoriesByUser(
     options: CategoryQueryParamsDto,
   ): Promise<Category[]> {
+    const { userId } = options
+
+    const isUserExist = await this.userService.isUserExistByQuery({
+      _id: userId,
+    })
+
+    if (!isUserExist) {
+      throw new NotFoundError(`User with userId ${userId} not found`)
+    }
+
     return await this.categoryDatabaseService.getCategoriesByUser(options)
   }
 
