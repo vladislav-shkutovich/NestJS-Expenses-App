@@ -57,9 +57,9 @@ export class UserDatabaseService {
   }
 
   async deleteUser(id: Types.ObjectId): Promise<void> {
-    const deletedUser = await this.userModel.findByIdAndDelete(id)
+    const { deletedCount } = await this.userModel.deleteOne({ _id: id })
 
-    if (!deletedUser) {
+    if (deletedCount === 0) {
       throw new NotFoundError(`User with id ${id} not found`)
     }
   }

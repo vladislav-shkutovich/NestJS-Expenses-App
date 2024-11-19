@@ -1,22 +1,31 @@
-import { Type } from 'class-transformer'
-import { IsBoolean, IsMongoId, IsOptional, IsString } from 'class-validator'
+import {
+  IsBoolean,
+  IsEnum,
+  IsISO4217CurrencyCode,
+  IsOptional,
+} from 'class-validator'
 import { Types } from 'mongoose'
 
+import { IsValidObjectId } from '../../common/decorators/is-valid-objectid.decorator'
+import { TransformBooleanStringToBoolean } from '../../common/decorators/transform-boolean-string-to-boolean.decorator'
+import { TransformStringToObjectId } from '../../common/decorators/transform-string-to-objectid.decorator'
+import { AccountType } from '../account.types'
+
 export class AccountQueryParamsDto {
-  @IsMongoId()
-  @Type(() => Types.ObjectId)
+  @TransformStringToObjectId()
+  @IsValidObjectId()
   userId: Types.ObjectId
 
   @IsOptional()
-  @IsString()
+  @IsISO4217CurrencyCode()
   currencyCode?: string
 
   @IsOptional()
-  @IsString()
-  accountType?: string
+  @IsEnum(AccountType)
+  accountType?: AccountType
 
   @IsOptional()
+  @TransformBooleanStringToBoolean()
   @IsBoolean()
-  @Type(() => Boolean)
   isSavings?: boolean
 }

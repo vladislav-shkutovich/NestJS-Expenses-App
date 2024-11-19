@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { Types } from 'mongoose'
+import { FilterQuery, Types } from 'mongoose'
 import { randomBytes, scrypt, timingSafeEqual } from 'node:crypto'
 import { promisify } from 'node:util'
 
@@ -38,7 +38,7 @@ export class UserService {
   }
 
   async createUser(createUserDto: CreateUserDto): Promise<UserWithoutPassword> {
-    const isDuplicate = await this.userDatabaseService.isUserExistByQuery({
+    const isDuplicate = await this.isUserExistByQuery({
       $or: [
         { username: createUserDto.username },
         { email: createUserDto.email },
@@ -97,5 +97,9 @@ export class UserService {
 
   async deleteUser(id: Types.ObjectId): Promise<void> {
     return await this.userDatabaseService.deleteUser(id)
+  }
+
+  async isUserExistByQuery(query: FilterQuery<User>): Promise<boolean> {
+    return await this.userDatabaseService.isUserExistByQuery(query)
   }
 }

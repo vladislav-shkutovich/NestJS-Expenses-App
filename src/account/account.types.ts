@@ -3,3 +3,8 @@ export enum AccountType {
   CARD = 'card',
   LOAN = 'loan',
 }
+
+export enum AccountTypeToUpdate {
+  CASH = 'cash',
+  CARD = 'card',
+}

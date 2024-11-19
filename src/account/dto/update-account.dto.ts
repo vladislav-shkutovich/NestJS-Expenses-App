@@ -1,6 +1,6 @@
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator'
 
-import { AccountType } from '../account.types'
+import { AccountTypeToUpdate } from '../account.types'
 
 export class UpdateAccountDto {
   @IsString()
@@ -8,7 +8,7 @@ export class UpdateAccountDto {
   @IsOptional()
   name?: string
 
-  @IsEnum(AccountType)
+  @IsEnum(AccountTypeToUpdate)
   @IsOptional()
-  accountType?: AccountType
+  accountType?: AccountTypeToUpdate
 }

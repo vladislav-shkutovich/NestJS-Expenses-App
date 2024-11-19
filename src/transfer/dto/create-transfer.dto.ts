@@ -1,7 +1,6 @@
 import { Type } from 'class-transformer'
 import {
   IsDate,
-  IsMongoId,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -11,11 +10,13 @@ import {
 } from 'class-validator'
 import { Types } from 'mongoose'
 
+import { IsValidObjectId } from '../../common/decorators/is-valid-objectid.decorator'
+import { TransformStringToObjectId } from '../../common/decorators/transform-string-to-objectid.decorator'
 import { TransferTargetDto } from './transfer-target.dto'
 
 export class CreateTransferDto {
-  @IsMongoId()
-  @Type(() => Types.ObjectId)
+  @TransformStringToObjectId()
+  @IsValidObjectId()
   userId: Types.ObjectId
 
   @ValidateNested()

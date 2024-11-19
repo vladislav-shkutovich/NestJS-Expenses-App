@@ -1,14 +1,15 @@
-import { Type } from 'class-transformer'
-import { IsMongoId, IsNotEmpty, IsNumber, IsString } from 'class-validator'
+import { IsISO4217CurrencyCode, IsNumber } from 'class-validator'
 import { Types } from 'mongoose'
 
+import { IsValidObjectId } from '../../common/decorators/is-valid-objectid.decorator'
+import { TransformStringToObjectId } from '../../common/decorators/transform-string-to-objectid.decorator'
+
 export class TransferTargetDto {
-  @IsMongoId()
-  @Type(() => Types.ObjectId)
+  @TransformStringToObjectId()
+  @IsValidObjectId()
   accountId: Types.ObjectId
 
-  @IsString()
-  @IsNotEmpty()
+  @IsISO4217CurrencyCode()
   currencyCode: string
 
   @IsNumber()

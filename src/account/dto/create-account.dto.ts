@@ -1,8 +1,7 @@
-import { Type } from 'class-transformer'
 import {
   IsBoolean,
   IsEnum,
-  IsMongoId,
+  IsISO4217CurrencyCode,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -10,15 +9,16 @@ import {
 } from 'class-validator'
 import { Types } from 'mongoose'
 
+import { IsValidObjectId } from '../../common/decorators/is-valid-objectid.decorator'
+import { TransformStringToObjectId } from '../../common/decorators/transform-string-to-objectid.decorator'
 import { AccountType } from '../account.types'
 
 export class CreateAccountDto {
-  @IsMongoId()
-  @Type(() => Types.ObjectId)
+  @TransformStringToObjectId()
+  @IsValidObjectId()
   userId: Types.ObjectId
 
-  @IsString()
-  @IsNotEmpty()
+  @IsISO4217CurrencyCode()
   currencyCode: string
 
   @IsString()

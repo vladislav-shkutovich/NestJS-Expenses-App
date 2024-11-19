@@ -1,9 +1,10 @@
-import { Type } from 'class-transformer'
-import { IsMongoId } from 'class-validator'
 import { Types } from 'mongoose'
 
+import { IsValidObjectId } from '../decorators/is-valid-objectid.decorator'
+import { TransformStringToObjectId } from '../decorators/transform-string-to-objectid.decorator'
+
 export class IdParamDto {
-  @IsMongoId()
-  @Type(() => Types.ObjectId)
+  @TransformStringToObjectId()
+  @IsValidObjectId()
   id: Types.ObjectId
 }
