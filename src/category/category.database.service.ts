@@ -17,8 +17,8 @@ export class CategoryDatabaseService {
   async createCategory(
     createCategoryDto: CreateCategoryDto,
   ): Promise<Category> {
-    console.error('mock createCategoryDto', createCategoryDto)
-    return {} as Category
+    const createdCategory = await this.categoryModel.create(createCategoryDto)
+    return createdCategory.toObject()
   }
 
   async getCategoryById(id: Types.ObjectId): Promise<Category> {

@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common'
 
 import { Types } from 'mongoose'
+import { NotFoundError } from '../common/errors/errors'
+import { UserService } from '../user/user.service'
 import { CategoryDatabaseService } from './category.database.service'
 import { CategoryQueryParamsDto } from './dto/category-query-params.dto'
 import { CreateCategoryDto } from './dto/create-category.dto'
@@ -11,11 +13,22 @@ import type { Category } from './schemas/category.schema'
 export class CategoryService {
   constructor(
     private readonly categoryDatabaseService: CategoryDatabaseService,
+    private readonly userService: UserService,
   ) {}
 
   async createCategory(
     createCategoryDto: CreateCategoryDto,
   ): Promise<Category> {
+    const { userId } = createCategoryDto
+
+    const isUserExist = await this.userService.isUserExistByQuery({
+      _id: userId,
+    })
+
+    if (!isUserExist) {
+      throw new NotFoundError(`User with userId ${userId} not found`)
+    }
+
     return await this.categoryDatabaseService.createCategory(createCategoryDto)
   }
 
