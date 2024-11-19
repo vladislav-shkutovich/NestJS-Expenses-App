@@ -22,7 +22,7 @@ export function IsValidObjectId(validationOptions?: ValidationOptions) {
 @ValidatorConstraint({ name: 'validateObjectId', async: false })
 class ValidateObjectId implements ValidatorConstraintInterface {
   validate(value: any): boolean {
-    return Types.ObjectId.isValid(value)
+    return Types.ObjectId.isValid(value) && value instanceof Types.ObjectId
   }
 
   defaultMessage(args: ValidationArguments): string {
