@@ -63,6 +63,8 @@ export class CategoryService {
   }
 
   async deleteCategory(id: Types.ObjectId): Promise<void> {
+    // TODO: - Provide a rejection on deleting a category if it is used in at least one operation; *after Operation module implementation
+
     return await this.categoryDatabaseService.deleteCategory(id)
   }
 }

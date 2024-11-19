@@ -58,6 +58,10 @@ export class CategoryDatabaseService {
   }
 
   async deleteCategory(id: Types.ObjectId): Promise<void> {
-    console.error('mock id', id)
+    const { deletedCount } = await this.categoryModel.deleteOne({ _id: id })
+
+    if (deletedCount === 0) {
+      throw new NotFoundError(`Category with id ${id} not found`)
+    }
   }
 }
