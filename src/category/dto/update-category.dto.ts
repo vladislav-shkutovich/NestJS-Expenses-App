@@ -11,10 +11,12 @@ import { CategoryType } from '../category.types'
 export class UpdateCategoryDto {
   @IsString()
   @IsNotEmpty()
-  name: string
+  @IsOptional()
+  name?: string
 
   @IsEnum(CategoryType)
-  type: CategoryType
+  @IsOptional()
+  type?: CategoryType
 
   @IsBoolean()
   @IsOptional()

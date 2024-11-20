@@ -13,7 +13,7 @@ export class CategoryQueryParamsDto {
 
   @IsOptional()
   @IsEnum(CategoryType)
-  type: CategoryType
+  type?: CategoryType
 
   @IsOptional()
   @TransformBooleanStringToBoolean()

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
-import { Types } from 'mongoose'
-import { NotFoundError } from '../common/errors/errors'
+import { FilterQuery, Types } from 'mongoose'
+import { NotFoundError, ValidationError } from '../common/errors/errors'
 import { UserService } from '../user/user.service'
 import { CategoryDatabaseService } from './category.database.service'
 import { CategoryQueryParamsDto } from './dto/category-query-params.dto'
@@ -19,7 +19,7 @@ export class CategoryService {
   async createCategory(
     createCategoryDto: CreateCategoryDto,
   ): Promise<Category> {
-    const { userId } = createCategoryDto
+    const { userId, name } = createCategoryDto
 
     const isUserExist = await this.userService.isUserExistByQuery({
       _id: userId,
@@ -27,6 +27,17 @@ export class CategoryService {
 
     if (!isUserExist) {
       throw new NotFoundError(`User with userId ${userId} not found`)
+    }
+
+    const isCategoryDuplicate = await this.isCategoryExistByQuery({
+      userId,
+      name,
+    })
+
+    if (isCategoryDuplicate) {
+      throw new ValidationError(
+        `Category name ${name} already exists for this user`,
+      )
     }
 
     return await this.categoryDatabaseService.createCategory(createCategoryDto)
@@ -56,6 +67,25 @@ export class CategoryService {
     id: Types.ObjectId,
     updateCategoryDto: UpdateCategoryDto,
   ): Promise<Category> {
+    const { name: updatedName } = updateCategoryDto
+
+    if (updatedName) {
+      const { userId, name: currentName } = await this.getCategoryById(id)
+
+      if (updatedName !== currentName) {
+        const isCategoryDuplicate = await this.isCategoryExistByQuery({
+          userId,
+          name: updatedName,
+        })
+
+        if (isCategoryDuplicate) {
+          throw new ValidationError(
+            `Category name ${updatedName} already exists for this user`,
+          )
+        }
+      }
+    }
+
     return await this.categoryDatabaseService.updateCategory(
       id,
       updateCategoryDto,
@@ -66,5 +96,9 @@ export class CategoryService {
     // TODO: - Provide a rejection on deleting a category if it is used in at least one operation; *after Operation module implementation
 
     return await this.categoryDatabaseService.deleteCategory(id)
+  }
+
+  async isCategoryExistByQuery(query: FilterQuery<Category>): Promise<boolean> {
+    return await this.categoryDatabaseService.isCategoryExistByQuery(query)
   }
 }

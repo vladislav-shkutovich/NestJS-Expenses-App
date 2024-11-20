@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { Model, Types } from 'mongoose'
+import { FilterQuery, Model, Types } from 'mongoose'
 
 import { CATEGORY_MODEL } from '../common/constants/database.constants'
 import { NotFoundError } from '../common/errors/errors'
@@ -63,5 +63,10 @@ export class CategoryDatabaseService {
     if (deletedCount === 0) {
       throw new NotFoundError(`Category with id ${id} not found`)
     }
+  }
+
+  async isCategoryExistByQuery(query: FilterQuery<Category>): Promise<boolean> {
+    const category = await this.categoryModel.findOne(query, { _id: 1 })
+    return !!category
   }
 }
