@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
-import { FilterQuery, Types } from 'mongoose'
-import { NotFoundError, ValidationError } from '../common/errors/errors'
+import { Types } from 'mongoose'
+import { ValidationError } from '../common/errors/errors'
 import { UserService } from '../user/user.service'
 import { CategoryDatabaseService } from './category.database.service'
 import { CategoryQueryParamsDto } from './dto/category-query-params.dto'
@@ -21,24 +21,9 @@ export class CategoryService {
   ): Promise<Category> {
     const { userId, name } = createCategoryDto
 
-    const isUserExist = await this.userService.isUserExistByQuery({
-      _id: userId,
-    })
+    await this.userService.ensureUserExists(userId)
 
-    if (!isUserExist) {
-      throw new NotFoundError(`User with userId ${userId} not found`)
-    }
-
-    const isCategoryDuplicate = await this.isCategoryExistByQuery({
-      userId,
-      name,
-    })
-
-    if (isCategoryDuplicate) {
-      throw new ValidationError(
-        `Category name ${name} already exists for this user`,
-      )
-    }
+    await this.ensureUserCategoryUnique(userId, name)
 
     return await this.categoryDatabaseService.createCategory(createCategoryDto)
   }
@@ -52,13 +37,7 @@ export class CategoryService {
   ): Promise<Category[]> {
     const { userId } = options
 
-    const isUserExist = await this.userService.isUserExistByQuery({
-      _id: userId,
-    })
-
-    if (!isUserExist) {
-      throw new NotFoundError(`User with userId ${userId} not found`)
-    }
+    await this.userService.ensureUserExists(userId)
 
     return await this.categoryDatabaseService.getCategoriesByUser(options)
   }
@@ -73,16 +52,7 @@ export class CategoryService {
       const { userId, name: currentName } = await this.getCategoryById(id)
 
       if (updatedName !== currentName) {
-        const isCategoryDuplicate = await this.isCategoryExistByQuery({
-          userId,
-          name: updatedName,
-        })
-
-        if (isCategoryDuplicate) {
-          throw new ValidationError(
-            `Category name ${updatedName} already exists for this user`,
-          )
-        }
+        await this.ensureUserCategoryUnique(userId, updatedName)
       }
     }
 
@@ -98,7 +68,20 @@ export class CategoryService {
     return await this.categoryDatabaseService.deleteCategory(id)
   }
 
-  async isCategoryExistByQuery(query: FilterQuery<Category>): Promise<boolean> {
-    return await this.categoryDatabaseService.isCategoryExistByQuery(query)
+  private async ensureUserCategoryUnique(
+    userId: Types.ObjectId,
+    categoryName: string,
+  ): Promise<void> {
+    const isUserCategoryDuplicate =
+      await this.categoryDatabaseService.isCategoryExistByQuery({
+        userId,
+        name: categoryName,
+      })
+
+    if (isUserCategoryDuplicate) {
+      throw new ValidationError(
+        `Category name ${categoryName} already exists for this user`,
+      )
+    }
   }
 }
