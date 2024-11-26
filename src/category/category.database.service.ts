@@ -5,9 +5,9 @@ import { FilterQuery, Model, Types } from 'mongoose'
 import { CATEGORY_MODEL } from '../common/constants/database.constants'
 import { NotFoundError } from '../common/errors/errors'
 import { removeUndefined } from '../common/utils/formatting.utils'
+import { UpdateCategoryOperators } from './category.types'
 import { CategoryQueryParamsDto } from './dto/category-query-params.dto'
 import { CreateCategoryDto } from './dto/create-category.dto'
-import { UpdateCategoryDto } from './dto/update-category.dto'
 import type { Category } from './schemas/category.schema'
 
 @Injectable()
@@ -42,10 +42,10 @@ export class CategoryDatabaseService {
 
   async updateCategory(
     id: Types.ObjectId,
-    updateCategoryDto: UpdateCategoryDto,
+    updateCategoryOperators: UpdateCategoryOperators,
   ): Promise<Category> {
     const updatedCategory = await this.categoryModel
-      .findByIdAndUpdate(id, updateCategoryDto, {
+      .findByIdAndUpdate(id, updateCategoryOperators, {
         new: true,
       })
       .lean()

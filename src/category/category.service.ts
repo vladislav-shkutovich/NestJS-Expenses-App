@@ -4,6 +4,7 @@ import { Types } from 'mongoose'
 import { ValidationError } from '../common/errors/errors'
 import { UserService } from '../user/user.service'
 import { CategoryDatabaseService } from './category.database.service'
+import { UpdateCategoryOperators } from './category.types'
 import { CategoryQueryParamsDto } from './dto/category-query-params.dto'
 import { CreateCategoryDto } from './dto/create-category.dto'
 import { UpdateCategoryDto } from './dto/update-category.dto'
@@ -46,19 +47,31 @@ export class CategoryService {
     id: Types.ObjectId,
     updateCategoryDto: UpdateCategoryDto,
   ): Promise<Category> {
-    const { name: updatedName } = updateCategoryDto
+    const { name: updatedName, isArchived } = updateCategoryDto
 
     if (updatedName) {
       const { userId, name: currentName } = await this.getCategoryById(id)
-
       if (updatedName !== currentName) {
         await this.ensureUserCategoryUnique(userId, updatedName)
       }
     }
 
+    const updateCategoryOperators: UpdateCategoryOperators = {
+      $set: globalThis.structuredClone(updateCategoryDto),
+      $unset: {},
+    }
+
+    if (isArchived === true) {
+      updateCategoryOperators.$set.archivedAt = new Date()
+    }
+
+    if (isArchived === false) {
+      updateCategoryOperators.$unset.archivedAt = null
+    }
+
     return await this.categoryDatabaseService.updateCategory(
       id,
-      updateCategoryDto,
+      updateCategoryOperators,
     )
   }
 
