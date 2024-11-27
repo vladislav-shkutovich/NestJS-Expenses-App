@@ -4,7 +4,11 @@ import { MongoServerError } from 'mongodb'
 import { Model, Types } from 'mongoose'
 
 import { CATEGORY_MODEL } from '../common/constants/database.constants'
-import { ConflictError, NotFoundError } from '../common/errors/errors'
+import {
+  ConflictError,
+  InternalDatabaseError,
+  NotFoundError,
+} from '../common/errors/errors'
 import { removeUndefined } from '../common/utils/formatting.utils'
 import { UpdateCategoryOperators } from './category.types'
 import { CategoryQueryParamsDto } from './dto/category-query-params.dto'
@@ -24,7 +28,7 @@ export class CategoryDatabaseService {
       const createdCategory = await this.categoryModel.create(createCategoryDto)
       return createdCategory.toObject()
     } catch (error) {
-      this.handleMongoDuplicateError(error)
+      this.handleDatabaseError(error)
     }
   }
 
@@ -62,7 +66,7 @@ export class CategoryDatabaseService {
 
       return updatedCategory
     } catch (error) {
-      this.handleMongoDuplicateError(error)
+      this.handleDatabaseError(error)
     }
   }
 
@@ -74,12 +78,15 @@ export class CategoryDatabaseService {
     }
   }
 
-  private handleMongoDuplicateError(error: unknown): never {
+  private handleDatabaseError(error: unknown): never {
+    console.error(error)
+
     if (error instanceof MongoServerError && error.code === 11000) {
       throw new ConflictError(
         `Duplicate key error. Document with ${JSON.stringify(error.keyValue)} already exists`,
       )
     }
-    throw new Error()
+
+    throw new InternalDatabaseError()
   }
 }

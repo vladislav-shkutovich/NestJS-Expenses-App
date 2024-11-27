@@ -12,7 +12,12 @@ import {
 import { Observable, throwError } from 'rxjs'
 import { catchError } from 'rxjs/operators'
 
-import { ValidationError, ConflictError, NotFoundError } from '../errors/errors'
+import {
+  ConflictError,
+  InternalDatabaseError,
+  NotFoundError,
+  ValidationError,
+} from '../errors/errors'
 
 @Injectable()
 export class ErrorsInterceptor implements NestInterceptor {
@@ -32,6 +37,10 @@ export class ErrorsInterceptor implements NestInterceptor {
 
           if (error instanceof ValidationError) {
             return new BadRequestException(error.message)
+          }
+
+          if (error instanceof InternalDatabaseError) {
+            return new InternalServerErrorException('Internal database error')
           }
 
           if (error instanceof HttpException) {
