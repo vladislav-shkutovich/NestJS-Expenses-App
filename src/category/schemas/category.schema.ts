@@ -29,6 +29,3 @@ export class Category {
 }
 
 export const CategorySchema = SchemaFactory.createForClass(Category)
-
-CategorySchema.index({ userId: 1, name: 1 }, { unique: true })
-CategorySchema.index({ archivedAt: 1 }, { expireAfterSeconds: 604800 })
