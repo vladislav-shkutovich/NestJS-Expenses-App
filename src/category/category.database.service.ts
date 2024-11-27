@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { FilterQuery, Model, Types } from 'mongoose'
+import { MongoServerError } from 'mongodb'
+import { Model, Types } from 'mongoose'
 
 import { CATEGORY_MODEL } from '../common/constants/database.constants'
-import { NotFoundError } from '../common/errors/errors'
+import { ConflictError, NotFoundError } from '../common/errors/errors'
 import { removeUndefined } from '../common/utils/formatting.utils'
 import { UpdateCategoryOperators } from './category.types'
 import { CategoryQueryParamsDto } from './dto/category-query-params.dto'
@@ -19,8 +20,12 @@ export class CategoryDatabaseService {
   async createCategory(
     createCategoryDto: CreateCategoryDto,
   ): Promise<Category> {
-    const createdCategory = await this.categoryModel.create(createCategoryDto)
-    return createdCategory.toObject()
+    try {
+      const createdCategory = await this.categoryModel.create(createCategoryDto)
+      return createdCategory.toObject()
+    } catch (error) {
+      this.handleMongoDuplicateError(error)
+    }
   }
 
   async getCategoryById(id: Types.ObjectId): Promise<Category> {
@@ -44,17 +49,21 @@ export class CategoryDatabaseService {
     id: Types.ObjectId,
     updateCategoryOperators: UpdateCategoryOperators,
   ): Promise<Category> {
-    const updatedCategory = await this.categoryModel
-      .findByIdAndUpdate(id, updateCategoryOperators, {
-        new: true,
-      })
-      .lean()
+    try {
+      const updatedCategory = await this.categoryModel
+        .findByIdAndUpdate(id, updateCategoryOperators, {
+          new: true,
+        })
+        .lean()
 
-    if (!updatedCategory) {
-      throw new NotFoundError(`Category with id ${id} not found`)
+      if (!updatedCategory) {
+        throw new NotFoundError(`Category with id ${id} not found`)
+      }
+
+      return updatedCategory
+    } catch (error) {
+      this.handleMongoDuplicateError(error)
     }
-
-    return updatedCategory
   }
 
   async deleteCategory(id: Types.ObjectId): Promise<void> {
@@ -65,8 +74,12 @@ export class CategoryDatabaseService {
     }
   }
 
-  async isCategoryExistByQuery(query: FilterQuery<Category>): Promise<boolean> {
-    const category = await this.categoryModel.findOne(query, { _id: 1 })
-    return !!category
+  private handleMongoDuplicateError(error: unknown): never {
+    if (error instanceof MongoServerError && error.code === 11000) {
+      throw new ConflictError(
+        `Duplicate key error. Document with ${JSON.stringify(error.keyValue)} already exists`,
+      )
+    }
+    throw new Error()
   }
 }
