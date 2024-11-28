@@ -60,9 +60,17 @@ export class OperationDatabaseService {
     id: Types.ObjectId,
     updateOperationDto: UpdateOperationDto,
   ): Promise<Operation> {
-    console.error('mock id', id)
-    console.error('mock updateOperationDto', updateOperationDto)
-    return {} as Operation
+    const updatedOperation = await this.operationModel
+      .findByIdAndUpdate(id, updateOperationDto, {
+        new: true,
+      })
+      .lean()
+
+    if (!updatedOperation) {
+      throw new NotFoundError(`Operation with id ${id} not found`)
+    }
+
+    return updatedOperation
   }
 
   async deleteOperation(id: Types.ObjectId): Promise<void> {
