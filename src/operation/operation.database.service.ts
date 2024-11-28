@@ -7,6 +7,7 @@ import { OperationQueryParamsDto } from './dto/operation-query-params.dto'
 import { UpdateOperationDto } from './dto/update-operation.dto'
 import type { CreateOperationContent } from './operation.types'
 import type { Operation } from './schemas/operation.schema'
+import { NotFoundError } from '../common/errors/errors'
 
 @Injectable()
 export class OperationDatabaseService {
@@ -24,8 +25,13 @@ export class OperationDatabaseService {
   }
 
   async getOperationById(id: Types.ObjectId): Promise<Operation> {
-    console.error('mock id', id)
-    return {} as Operation
+    const operationById = await this.operationModel.findById(id).lean()
+
+    if (!operationById) {
+      throw new NotFoundError(`Operation with id ${id} not found`)
+    }
+
+    return operationById
   }
 
   async getOperationsByUser(
