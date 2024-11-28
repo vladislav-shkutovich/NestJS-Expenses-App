@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { Model, Types } from 'mongoose'
+import { FilterQuery, Model, Types } from 'mongoose'
 
 import { OPERATION_MODEL } from '../common/constants/database.constants'
+import { NotFoundError } from '../common/errors/errors'
+import { removeUndefined } from '../common/utils/formatting.utils'
 import { OperationQueryParamsDto } from './dto/operation-query-params.dto'
 import { UpdateOperationDto } from './dto/update-operation.dto'
 import type { CreateOperationContent } from './operation.types'
 import type { Operation } from './schemas/operation.schema'
-import { NotFoundError } from '../common/errors/errors'
 
 @Injectable()
 export class OperationDatabaseService {
@@ -37,8 +38,22 @@ export class OperationDatabaseService {
   async getOperationsByUser(
     options: OperationQueryParamsDto,
   ): Promise<Operation[]> {
-    console.error('mock options', options)
-    return [] as Operation[]
+    const { dateFrom, dateTo, ...restOptions } = removeUndefined(options)
+    const query: FilterQuery<Operation> = restOptions
+
+    if (dateFrom || dateTo) {
+      query.date = {}
+
+      if (dateFrom) {
+        query.date.$gte = dateFrom
+      }
+
+      if (dateTo) {
+        query.date.$lte = dateTo
+      }
+    }
+
+    return await this.operationModel.find(query).lean()
   }
 
   async updateOperation(
