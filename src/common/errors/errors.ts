@@ -19,7 +19,7 @@ export class ValidationError extends Error {
   }
 }
 
-export class InternalDatabaseError extends Error {
+export class DatabaseError extends Error {
   constructor(...args: ConstructorParameters<typeof Error>) {
     super(...args)
     this.name = this.constructor.name

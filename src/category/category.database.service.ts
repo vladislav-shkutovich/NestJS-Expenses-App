@@ -6,7 +6,7 @@ import { Model, Types } from 'mongoose'
 import { CATEGORY_MODEL } from '../common/constants/database.constants'
 import {
   ConflictError,
-  InternalDatabaseError,
+  DatabaseError,
   NotFoundError,
 } from '../common/errors/errors'
 import { removeUndefined } from '../common/utils/formatting.utils'
@@ -79,14 +79,18 @@ export class CategoryDatabaseService {
   }
 
   private handleDatabaseError(error: unknown): never {
-    console.error(error)
-
     if (error instanceof MongoServerError && error.code === 11000) {
       throw new ConflictError(
         `Duplicate key error. Document with ${JSON.stringify(error.keyValue)} already exists`,
+        { cause: error },
       )
     }
 
-    throw new InternalDatabaseError()
+    throw new DatabaseError(
+      error instanceof Error
+        ? error.message
+        : 'Something went wrong while operating with the DB',
+      { cause: error },
+    )
   }
 }
