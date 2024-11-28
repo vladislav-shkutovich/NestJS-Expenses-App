@@ -66,6 +66,9 @@ export class CategoryDatabaseService {
 
       return updatedCategory
     } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw error
+      }
       this.handleDatabaseError(error)
     }
   }
