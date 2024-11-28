@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
 import { Types } from 'mongoose'
+import { AccountService } from '../account/account.service'
 import { CreateOperationDto } from './dto/create-operation.dto'
 import { OperationQueryParamsDto } from './dto/operation-query-params.dto'
 import { UpdateOperationDto } from './dto/update-operation.dto'
@@ -11,14 +12,19 @@ import type { Operation } from './schemas/operation.schema'
 export class OperationService {
   constructor(
     private readonly operationDatabaseService: OperationDatabaseService,
+    private readonly accountService: AccountService,
   ) {}
 
   async createOperation(
     createOperationDto: CreateOperationDto,
   ): Promise<Operation> {
-    return await this.operationDatabaseService.createOperation(
-      createOperationDto,
-    )
+    const { accountId } = createOperationDto
+    const { currencyCode } = await this.accountService.getAccountById(accountId)
+
+    return await this.operationDatabaseService.createOperation({
+      ...createOperationDto,
+      currencyCode,
+    })
   }
 
   async getOperationById(id: Types.ObjectId): Promise<Operation> {

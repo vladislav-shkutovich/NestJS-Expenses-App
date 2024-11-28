@@ -3,9 +3,9 @@ import { InjectModel } from '@nestjs/mongoose'
 import { Model, Types } from 'mongoose'
 
 import { OPERATION_MODEL } from '../common/constants/database.constants'
-import { CreateOperationDto } from './dto/create-operation.dto'
 import { OperationQueryParamsDto } from './dto/operation-query-params.dto'
 import { UpdateOperationDto } from './dto/update-operation.dto'
+import type { CreateOperationContent } from './operation.types'
 import type { Operation } from './schemas/operation.schema'
 
 @Injectable()
@@ -15,10 +15,12 @@ export class OperationDatabaseService {
   ) {}
 
   async createOperation(
-    createOperationDto: CreateOperationDto,
+    createOperationContent: CreateOperationContent,
   ): Promise<Operation> {
-    console.error('mock createOperationDto', createOperationDto)
-    return {} as Operation
+    const createdOperation = await this.operationModel.create(
+      createOperationContent,
+    )
+    return createdOperation.toObject()
   }
 
   async getOperationById(id: Types.ObjectId): Promise<Operation> {
