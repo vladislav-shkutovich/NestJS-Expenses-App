@@ -74,6 +74,10 @@ export class OperationDatabaseService {
   }
 
   async deleteOperation(id: Types.ObjectId): Promise<void> {
-    console.error('mock id', id)
+    const { deletedCount } = await this.operationModel.deleteOne({ _id: id })
+
+    if (deletedCount === 0) {
+      throw new NotFoundError(`Operation with id ${id} not found`)
+    }
   }
 }
