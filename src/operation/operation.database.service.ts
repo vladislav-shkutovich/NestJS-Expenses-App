@@ -7,7 +7,7 @@ import { NotFoundError } from '../common/errors/errors'
 import { removeUndefined } from '../common/utils/formatting.utils'
 import { OperationQueryParamsDto } from './dto/operation-query-params.dto'
 import { UpdateOperationDto } from './dto/update-operation.dto'
-import type { CreateOperationContent } from './operation.types'
+import { CreateOperationContent, OperationType } from './operation.types'
 import type { Operation } from './schemas/operation.schema'
 
 @Injectable()
@@ -38,7 +38,7 @@ export class OperationDatabaseService {
   async getOperationsByUser(
     options: OperationQueryParamsDto,
   ): Promise<Operation[]> {
-    const { dateFrom, dateTo, ...restOptions } = removeUndefined(options)
+    const { dateFrom, dateTo, type, ...restOptions } = removeUndefined(options)
     const query: FilterQuery<Operation> = restOptions
 
     if (dateFrom || dateTo) {
@@ -50,6 +50,16 @@ export class OperationDatabaseService {
 
       if (dateTo) {
         query.date.$lte = dateTo
+      }
+    }
+
+    if (type) {
+      if (type === OperationType.INCOME) {
+        query.amount = { $gt: 0 }
+      }
+
+      if (type === OperationType.WITHDRAWAL) {
+        query.amount = { $lt: 0 }
       }
     }
 
