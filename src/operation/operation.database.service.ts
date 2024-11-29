@@ -90,4 +90,11 @@ export class OperationDatabaseService {
       throw new NotFoundError(`Operation with id ${id} not found`)
     }
   }
+
+  async isOperationExistByQuery(
+    query: FilterQuery<Operation>,
+  ): Promise<boolean> {
+    const operation = await this.operationModel.findOne(query, { _id: 1 })
+    return !!operation
+  }
 }

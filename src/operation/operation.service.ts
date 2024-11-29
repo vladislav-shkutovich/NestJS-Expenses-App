@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 
-import { Types } from 'mongoose'
+import { FilterQuery, Types } from 'mongoose'
 import { AccountService } from '../account/account.service'
 import { CreateOperationDto } from './dto/create-operation.dto'
 import { OperationQueryParamsDto } from './dto/operation-query-params.dto'
@@ -49,5 +49,11 @@ export class OperationService {
 
   async deleteOperation(id: Types.ObjectId): Promise<void> {
     return await this.operationDatabaseService.deleteOperation(id)
+  }
+
+  async isOperationExistByQuery(
+    query: FilterQuery<Operation>,
+  ): Promise<boolean> {
+    return await this.operationDatabaseService.isOperationExistByQuery(query)
   }
 }

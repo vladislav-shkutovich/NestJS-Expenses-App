@@ -8,11 +8,14 @@ import { CategoryQueryParamsDto } from './dto/category-query-params.dto'
 import { CreateCategoryDto } from './dto/create-category.dto'
 import { UpdateCategoryDto } from './dto/update-category.dto'
 import type { Category } from './schemas/category.schema'
+import { OperationService } from '../operation/operation.service'
+import { UnprocessableError } from '../common/errors/errors'
 
 @Injectable()
 export class CategoryService {
   constructor(
     private readonly categoryDatabaseService: CategoryDatabaseService,
+    private readonly operationService: OperationService,
     private readonly userService: UserService,
   ) {}
 
@@ -66,7 +69,16 @@ export class CategoryService {
   }
 
   async deleteCategory(id: Types.ObjectId): Promise<void> {
-    // TODO: - Provide a rejection on deleting a category if it is used in at least one operation; *after Operation module implementation
+    const isCategoryUsedInOperations =
+      await this.operationService.isOperationExistByQuery({
+        categoryId: id,
+      })
+
+    if (isCategoryUsedInOperations) {
+      throw new UnprocessableError(
+        'You cannot delete a category that is already in use in operations. You can archive this category instead.',
+      )
+    }
 
     return await this.categoryDatabaseService.deleteCategory(id)
   }

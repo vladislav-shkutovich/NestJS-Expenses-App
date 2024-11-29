@@ -17,5 +17,6 @@ import { OperationSchema } from './schemas/operation.schema'
   ],
   controllers: [OperationController],
   providers: [OperationService, OperationDatabaseService],
+  exports: [OperationService],
 })
 export class OperationModule {}

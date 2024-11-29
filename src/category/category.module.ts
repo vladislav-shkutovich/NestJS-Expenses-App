@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
 
 import { CATEGORY_MODEL } from '../common/constants/database.constants'
+import { OperationModule } from '../operation/operation.module'
 import { UserModule } from '../user/user.module'
 import { CategoryController } from './category.controller'
 import { CategoryDatabaseService } from './category.database.service'
@@ -13,6 +14,7 @@ import { CategorySchema } from './schemas/category.schema'
     MongooseModule.forFeature([
       { name: CATEGORY_MODEL, schema: CategorySchema },
     ]),
+    OperationModule,
     UserModule,
   ],
   controllers: [CategoryController],
