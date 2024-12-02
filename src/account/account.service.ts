@@ -1,11 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
 import { Types } from 'mongoose'
-import {
-  ConflictError,
-  NotFoundError,
-  ValidationError,
-} from '../common/errors/errors'
+import { ConflictError, ValidationError } from '../common/errors/errors'
 import { UserService } from '../user/user.service'
 import { AccountDatabaseService } from './account.database.service'
 import { AccountType } from './account.types'
@@ -28,13 +24,7 @@ export class AccountService {
       throw new ValidationError('Loan account type cannot be marked as savings')
     }
 
-    const isUserExist = await this.userService.isUserExistByQuery({
-      _id: userId,
-    })
-
-    if (!isUserExist) {
-      throw new NotFoundError(`User with userId ${userId} not found`)
-    }
+    await this.userService.ensureUserExists(userId)
 
     return await this.accountDatabaseService.createAccount(createAccountDto)
   }
@@ -46,13 +36,7 @@ export class AccountService {
   async getAccountsByUser(options: AccountQueryParamsDto): Promise<Account[]> {
     const { userId } = options
 
-    const isUserExist = await this.userService.isUserExistByQuery({
-      _id: userId,
-    })
-
-    if (!isUserExist) {
-      throw new NotFoundError(`User with userId ${userId} not found`)
-    }
+    await this.userService.ensureUserExists(userId)
 
     return await this.accountDatabaseService.getAccountsByUser(options)
   }
