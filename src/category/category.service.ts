@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common'
 
 import { Types } from 'mongoose'
+import { UnprocessableError } from '../common/errors/errors'
+import { OperationDatabaseService } from '../operation/operation.database.service'
 import { UserService } from '../user/user.service'
 import { CategoryDatabaseService } from './category.database.service'
 import { UpdateCategoryOperators } from './category.types'
@@ -8,14 +10,12 @@ import { CategoryQueryParamsDto } from './dto/category-query-params.dto'
 import { CreateCategoryDto } from './dto/create-category.dto'
 import { UpdateCategoryDto } from './dto/update-category.dto'
 import type { Category } from './schemas/category.schema'
-import { OperationService } from '../operation/operation.service'
-import { UnprocessableError } from '../common/errors/errors'
 
 @Injectable()
 export class CategoryService {
   constructor(
     private readonly categoryDatabaseService: CategoryDatabaseService,
-    private readonly operationService: OperationService,
+    private readonly operationDatabaseService: OperationDatabaseService,
     private readonly userService: UserService,
   ) {}
 
@@ -70,7 +70,7 @@ export class CategoryService {
 
   async deleteCategory(id: Types.ObjectId): Promise<void> {
     const isCategoryUsedInOperations =
-      await this.operationService.isOperationExistByQuery({
+      await this.operationDatabaseService.isOperationExistByQuery({
         categoryId: id,
       })
 

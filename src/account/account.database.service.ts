@@ -60,4 +60,12 @@ export class AccountDatabaseService {
       throw new NotFoundError(`Account with id ${id} not found`)
     }
   }
+
+  async updateAccountBalanceByAmount(
+    id: Types.ObjectId,
+    amount: number,
+  ): Promise<void> {
+    // TODO: - Handle update account balance by amount errors;
+    await this.accountModel.findByIdAndUpdate(id, { $inc: { balance: amount } })
+  }
 }

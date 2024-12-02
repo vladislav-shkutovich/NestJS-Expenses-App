@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common'
 
-import { FilterQuery, Types } from 'mongoose'
+import { Types } from 'mongoose'
 import { AccountService } from '../account/account.service'
+import { CategoryService } from '../category/category.service'
+import { ValidationError } from '../common/errors/errors'
 import { CreateOperationDto } from './dto/create-operation.dto'
 import { OperationQueryParamsDto } from './dto/operation-query-params.dto'
 import { UpdateOperationDto } from './dto/update-operation.dto'
@@ -13,13 +15,27 @@ export class OperationService {
   constructor(
     private readonly operationDatabaseService: OperationDatabaseService,
     private readonly accountService: AccountService,
+    private readonly categoryService: CategoryService,
   ) {}
 
   async createOperation(
     createOperationDto: CreateOperationDto,
   ): Promise<Operation> {
-    const { accountId } = createOperationDto
-    const { currencyCode } = await this.accountService.getAccountById(accountId)
+    // TODO: - Refactor create operation restrictions and logic;
+    const { accountId, userId, categoryId, amount } = createOperationDto
+
+    const { currencyCode, userId: accountUserId } =
+      await this.accountService.getAccountById(accountId)
+
+    if (!accountUserId.equals(userId)) {
+      throw new ValidationError(
+        'Selected account userId must be equal to this operation userId',
+      )
+    }
+
+    await this.checkOperationCategory(categoryId, userId)
+
+    await this.accountService.updateAccountBalanceByAmount(accountId, amount)
 
     return await this.operationDatabaseService.createOperation({
       ...createOperationDto,
@@ -51,9 +67,29 @@ export class OperationService {
     return await this.operationDatabaseService.deleteOperation(id)
   }
 
-  async isOperationExistByQuery(
-    query: FilterQuery<Operation>,
-  ): Promise<boolean> {
-    return await this.operationDatabaseService.isOperationExistByQuery(query)
+  private async checkOperationCategory(
+    operationCategoryId: Types.ObjectId,
+    operationUserId: Types.ObjectId,
+  ): Promise<void> {
+    const { isArchived, userId } =
+      await this.categoryService.getCategoryById(operationCategoryId)
+
+    const operationCategoryErrors: string[] = []
+
+    if (isArchived) {
+      operationCategoryErrors.push(
+        'Selected category for this operation is archived',
+      )
+    }
+
+    if (!operationUserId.equals(userId)) {
+      operationCategoryErrors.push(
+        'Selected category userId must be equal to this operation userId',
+      )
+    }
+
+    if (operationCategoryErrors.length > 0) {
+      throw new ValidationError(operationCategoryErrors.join('. '))
+    }
   }
 }

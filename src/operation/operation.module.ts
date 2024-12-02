@@ -1,7 +1,8 @@
-import { Module } from '@nestjs/common'
+import { forwardRef, Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
 
 import { AccountModule } from '../account/account.module'
+import { CategoryModule } from '../category/category.module'
 import { OPERATION_MODEL } from '../common/constants/database.constants'
 import { OperationController } from './operation.controller'
 import { OperationDatabaseService } from './operation.database.service'
@@ -14,9 +15,10 @@ import { OperationSchema } from './schemas/operation.schema'
       { name: OPERATION_MODEL, schema: OperationSchema },
     ]),
     AccountModule,
+    forwardRef(() => CategoryModule),
   ],
   controllers: [OperationController],
   providers: [OperationService, OperationDatabaseService],
-  exports: [OperationService],
+  exports: [OperationDatabaseService],
 })
 export class OperationModule {}
