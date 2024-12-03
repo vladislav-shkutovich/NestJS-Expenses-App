@@ -5,6 +5,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  NotEquals,
 } from 'class-validator'
 import { Types } from 'mongoose'
 
@@ -18,6 +19,7 @@ export class UpdateOperationDto {
   categoryId?: Types.ObjectId
 
   @IsNumber()
+  @NotEquals(0)
   @IsOptional()
   amount?: number
 
