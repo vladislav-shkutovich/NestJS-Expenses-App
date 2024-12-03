@@ -84,6 +84,10 @@ export class OperationService {
   }
 
   async deleteOperation(id: Types.ObjectId): Promise<void> {
+    const { accountId, amount } = await this.getOperationById(id)
+
+    await this.accountService.updateAccountBalanceByAmount(accountId, -amount)
+
     return await this.operationDatabaseService.deleteOperation(id)
   }
 
