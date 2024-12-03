@@ -17,11 +17,13 @@ export class OperationService {
     private readonly accountService: AccountService,
     private readonly categoryService: CategoryService,
   ) {}
+  // TODO: - Unite repeated checks (account and category) and logic (balance recalculation) into helper methods;
 
   async createOperation(
     createOperationDto: CreateOperationDto,
   ): Promise<Operation> {
-    // TODO: - Refactor create operation restrictions and logic;
+    // TODO: - Recalculate Summary which affected by Operation date and amount on create operation;
+
     const { accountId, userId, categoryId, amount } = createOperationDto
 
     const { currencyCode, userId: accountUserId } =
@@ -57,6 +59,8 @@ export class OperationService {
     id: Types.ObjectId,
     updateOperationDto: UpdateOperationDto,
   ): Promise<Operation> {
+    // TODO: - Recalculate Summary which affected by Operation date and amount on update operation;
+
     const { categoryId, amount } = updateOperationDto
     const {
       accountId,
@@ -84,6 +88,8 @@ export class OperationService {
   }
 
   async deleteOperation(id: Types.ObjectId): Promise<void> {
+    // TODO: - Recalculate Summary which affected by Operation date and amount on delete operation;
+
     const { accountId, amount } = await this.getOperationById(id)
 
     await this.accountService.updateAccountBalanceByAmount(accountId, -amount)
