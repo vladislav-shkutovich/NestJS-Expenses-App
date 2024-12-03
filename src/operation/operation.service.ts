@@ -57,6 +57,26 @@ export class OperationService {
     id: Types.ObjectId,
     updateOperationDto: UpdateOperationDto,
   ): Promise<Operation> {
+    const { categoryId, amount } = updateOperationDto
+    const {
+      accountId,
+      userId,
+      amount: prevAmount,
+    } = await this.getOperationById(id)
+
+    if (categoryId) {
+      await this.checkOperationCategory(categoryId, userId)
+    }
+
+    if (amount) {
+      const amountDiff = amount - prevAmount
+
+      await this.accountService.updateAccountBalanceByAmount(
+        accountId,
+        amountDiff,
+      )
+    }
+
     return await this.operationDatabaseService.updateOperation(
       id,
       updateOperationDto,
