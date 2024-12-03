@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { Model, Types } from 'mongoose'
+import { ClientSession, Model, Types } from 'mongoose'
 
 import { ACCOUNT_MODEL } from '../common/constants/database.constants'
+import { NotFoundError } from '../common/errors/errors'
+import { removeUndefined } from '../common/utils/formatting.utils'
 import { AccountQueryParamsDto } from './dto/account-query-params.dto'
 import { CreateAccountDto } from './dto/create-account.dto'
 import { UpdateAccountDto } from './dto/update-account.dto'
 import type { Account } from './schemas/account.schema'
-import { NotFoundError } from '../common/errors/errors'
-import { removeUndefined } from '../common/utils/formatting.utils'
 
 @Injectable()
 export class AccountDatabaseService {
@@ -64,8 +64,13 @@ export class AccountDatabaseService {
   async updateAccountBalanceByAmount(
     id: Types.ObjectId,
     amount: number,
+    session?: ClientSession,
   ): Promise<void> {
     // TODO: - Handle update account balance by amount errors;
-    await this.accountModel.findByIdAndUpdate(id, { $inc: { balance: amount } })
+    await this.accountModel.findByIdAndUpdate(
+      id,
+      { $inc: { balance: amount } },
+      { session },
+    )
   }
 }

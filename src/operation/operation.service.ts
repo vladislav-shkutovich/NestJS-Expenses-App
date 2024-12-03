@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common'
+import { ClientSession, Types } from 'mongoose'
 
-import { Types } from 'mongoose'
 import { AccountService } from '../account/account.service'
 import { CategoryService } from '../category/category.service'
 import { ValidationError } from '../common/errors/errors'
+import { TransactionService } from '../common/services/transaction.service'
 import { CreateOperationDto } from './dto/create-operation.dto'
 import { OperationQueryParamsDto } from './dto/operation-query-params.dto'
 import { UpdateOperationDto } from './dto/update-operation.dto'
@@ -16,33 +17,45 @@ export class OperationService {
     private readonly operationDatabaseService: OperationDatabaseService,
     private readonly accountService: AccountService,
     private readonly categoryService: CategoryService,
+    private readonly transactionService: TransactionService,
   ) {}
   // TODO: - Unite repeated checks (account and category) and logic (balance recalculation) into helper methods;
 
   async createOperation(
     createOperationDto: CreateOperationDto,
   ): Promise<Operation> {
-    // TODO: - Recalculate Summary which affected by Operation date and amount on create operation;
+    return this.transactionService.executeInTransaction(
+      async (session: ClientSession) => {
+        // TODO: - Recalculate Summary which affected by Operation date and amount on create operation;
 
-    const { accountId, userId, categoryId, amount } = createOperationDto
+        const { accountId, userId, categoryId, amount } = createOperationDto
 
-    const { currencyCode, userId: accountUserId } =
-      await this.accountService.getAccountById(accountId)
+        const { currencyCode, userId: accountUserId } =
+          await this.accountService.getAccountById(accountId)
 
-    if (!accountUserId.equals(userId)) {
-      throw new ValidationError(
-        'Selected account userId must be equal to this operation userId',
-      )
-    }
+        if (!accountUserId.equals(userId)) {
+          throw new ValidationError(
+            'Selected account userId must be equal to this operation userId',
+          )
+        }
 
-    await this.checkOperationCategory(categoryId, userId)
+        await this.validateOperationCategory(categoryId, userId)
 
-    await this.accountService.updateAccountBalanceByAmount(accountId, amount)
+        await this.accountService.updateAccountBalanceByAmount(
+          accountId,
+          amount,
+          session,
+        )
 
-    return await this.operationDatabaseService.createOperation({
-      ...createOperationDto,
-      currencyCode,
-    })
+        return await this.operationDatabaseService.createOperation(
+          {
+            ...createOperationDto,
+            currencyCode,
+          },
+          session,
+        )
+      },
+    )
   }
 
   async getOperationById(id: Types.ObjectId): Promise<Operation> {
@@ -59,45 +72,59 @@ export class OperationService {
     id: Types.ObjectId,
     updateOperationDto: UpdateOperationDto,
   ): Promise<Operation> {
-    // TODO: - Recalculate Summary which affected by Operation date and amount on update operation;
+    return this.transactionService.executeInTransaction(
+      async (session: ClientSession) => {
+        // TODO: - Recalculate Summary which affected by Operation date and amount on update operation;
 
-    const { categoryId, amount } = updateOperationDto
-    const {
-      accountId,
-      userId,
-      amount: prevAmount,
-    } = await this.getOperationById(id)
+        const { categoryId, amount } = updateOperationDto
+        const {
+          accountId,
+          userId,
+          amount: prevAmount,
+        } = await this.getOperationById(id)
 
-    if (categoryId) {
-      await this.checkOperationCategory(categoryId, userId)
-    }
+        if (categoryId) {
+          await this.validateOperationCategory(categoryId, userId)
+        }
 
-    if (amount) {
-      const amountDiff = amount - prevAmount
+        if (amount) {
+          const amountDiff = amount - prevAmount
 
-      await this.accountService.updateAccountBalanceByAmount(
-        accountId,
-        amountDiff,
-      )
-    }
+          await this.accountService.updateAccountBalanceByAmount(
+            accountId,
+            amountDiff,
+            session,
+          )
+        }
 
-    return await this.operationDatabaseService.updateOperation(
-      id,
-      updateOperationDto,
+        return await this.operationDatabaseService.updateOperation(
+          id,
+          updateOperationDto,
+          session,
+        )
+      },
     )
   }
 
   async deleteOperation(id: Types.ObjectId): Promise<void> {
-    // TODO: - Recalculate Summary which affected by Operation date and amount on delete operation;
+    return this.transactionService.executeInTransaction(
+      async (session: ClientSession) => {
+        // TODO: - Recalculate Summary which affected by Operation date and amount on delete operation;
 
-    const { accountId, amount } = await this.getOperationById(id)
+        const { accountId, amount } = await this.getOperationById(id)
 
-    await this.accountService.updateAccountBalanceByAmount(accountId, -amount)
+        await this.accountService.updateAccountBalanceByAmount(
+          accountId,
+          -amount,
+          session,
+        )
 
-    return await this.operationDatabaseService.deleteOperation(id)
+        return await this.operationDatabaseService.deleteOperation(id, session)
+      },
+    )
   }
 
-  private async checkOperationCategory(
+  private async validateOperationCategory(
     operationCategoryId: Types.ObjectId,
     operationUserId: Types.ObjectId,
   ): Promise<void> {

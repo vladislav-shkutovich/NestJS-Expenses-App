@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { FilterQuery, Model, Types } from 'mongoose'
+import { ClientSession, FilterQuery, Model, Types } from 'mongoose'
 
 import { OPERATION_MODEL } from '../common/constants/database.constants'
 import { NotFoundError } from '../common/errors/errors'
@@ -18,10 +18,11 @@ export class OperationDatabaseService {
 
   async createOperation(
     createOperationContent: CreateOperationContent,
+    session?: ClientSession,
   ): Promise<Operation> {
-    const createdOperation = await this.operationModel.create(
-      createOperationContent,
-    )
+    const operationDoc = new this.operationModel(createOperationContent)
+    const createdOperation = await operationDoc.save({ session })
+
     return createdOperation.toObject()
   }
 
@@ -69,10 +70,12 @@ export class OperationDatabaseService {
   async updateOperation(
     id: Types.ObjectId,
     updateOperationDto: UpdateOperationDto,
+    session: ClientSession,
   ): Promise<Operation> {
     const updatedOperation = await this.operationModel
       .findByIdAndUpdate(id, updateOperationDto, {
         new: true,
+        session,
       })
       .lean()
 
@@ -83,8 +86,14 @@ export class OperationDatabaseService {
     return updatedOperation
   }
 
-  async deleteOperation(id: Types.ObjectId): Promise<void> {
-    const { deletedCount } = await this.operationModel.deleteOne({ _id: id })
+  async deleteOperation(
+    id: Types.ObjectId,
+    session?: ClientSession,
+  ): Promise<void> {
+    const { deletedCount } = await this.operationModel.deleteOne(
+      { _id: id },
+      { session },
+    )
 
     if (deletedCount === 0) {
       throw new NotFoundError(`Operation with id ${id} not found`)
