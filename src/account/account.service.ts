@@ -72,8 +72,8 @@ export class AccountService {
     id: Types.ObjectId,
     amount: number,
     session?: ClientSession,
-  ): Promise<void> {
-    await this.accountDatabaseService.updateAccountBalanceByAmount(
+  ): Promise<Account> {
+    return await this.accountDatabaseService.updateAccountBalanceByAmount(
       id,
       amount,
       session,

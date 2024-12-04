@@ -11,14 +11,19 @@ export class TransactionService {
   ): Promise<T> {
     const session = await this.connection.startSession()
     session.startTransaction()
+
     try {
       const result = await transactionCallback(session)
       await session.commitTransaction()
+
       console.log('Transaction committed successfully')
+
       return result
     } catch (error) {
       await session.abortTransaction()
+
       console.error('Transaction aborted. error: ', error)
+
       throw error
     } finally {
       session.endSession()

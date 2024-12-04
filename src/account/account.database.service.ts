@@ -65,12 +65,17 @@ export class AccountDatabaseService {
     id: Types.ObjectId,
     amount: number,
     session?: ClientSession,
-  ): Promise<void> {
-    // TODO: - Handle update account balance by amount errors;
-    await this.accountModel.findByIdAndUpdate(
+  ): Promise<Account> {
+    const updatedAccount = await this.accountModel.findByIdAndUpdate(
       id,
-      { $inc: { balance: amount } },
+      { $inc: { balance: amount }, new: true },
       { session },
     )
+
+    if (!updatedAccount) {
+      throw new NotFoundError(`Account with id ${id} not found`)
+    }
+
+    return updatedAccount
   }
 }

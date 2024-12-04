@@ -19,33 +19,29 @@ export class OperationService {
     private readonly categoryService: CategoryService,
     private readonly transactionService: TransactionService,
   ) {}
-  // TODO: - Unite repeated checks (account and category) and logic (balance recalculation) into helper methods;
 
+  // TODO: - Recalculate Summary which affected by Operation date and amount on create operation;
   async createOperation(
     createOperationDto: CreateOperationDto,
   ): Promise<Operation> {
     return this.transactionService.executeInTransaction(
       async (session: ClientSession) => {
-        // TODO: - Recalculate Summary which affected by Operation date and amount on create operation;
-
         const { accountId, userId, categoryId, amount } = createOperationDto
 
         const { currencyCode, userId: accountUserId } =
-          await this.accountService.getAccountById(accountId)
+          await this.accountService.updateAccountBalanceByAmount(
+            accountId,
+            amount,
+            session,
+          )
 
-        if (!accountUserId.equals(userId)) {
+        if (!userId.equals(accountUserId)) {
           throw new ValidationError(
-            'Selected account userId must be equal to this operation userId',
+            'Specified in operation userId must match a userId in specified account',
           )
         }
 
         await this.validateOperationCategory(categoryId, userId)
-
-        await this.accountService.updateAccountBalanceByAmount(
-          accountId,
-          amount,
-          session,
-        )
 
         return await this.operationDatabaseService.createOperation(
           {
@@ -68,33 +64,35 @@ export class OperationService {
     return await this.operationDatabaseService.getOperationsByUser(options)
   }
 
+  // TODO: - Recalculate Summary which affected by Operation date and amount on update operation;
   async updateOperation(
     id: Types.ObjectId,
     updateOperationDto: UpdateOperationDto,
   ): Promise<Operation> {
     return this.transactionService.executeInTransaction(
       async (session: ClientSession) => {
-        // TODO: - Recalculate Summary which affected by Operation date and amount on update operation;
-
         const { categoryId, amount } = updateOperationDto
-        const {
-          accountId,
-          userId,
-          amount: prevAmount,
-        } = await this.getOperationById(id)
 
-        if (categoryId) {
-          await this.validateOperationCategory(categoryId, userId)
-        }
-
-        if (amount) {
-          const amountDiff = amount - prevAmount
-
-          await this.accountService.updateAccountBalanceByAmount(
+        if (categoryId || amount) {
+          const {
             accountId,
-            amountDiff,
-            session,
-          )
+            userId,
+            amount: prevAmount,
+          } = await this.getOperationById(id)
+
+          if (categoryId) {
+            await this.validateOperationCategory(categoryId, userId)
+          }
+
+          if (amount) {
+            const amountDiff = amount - prevAmount
+
+            await this.accountService.updateAccountBalanceByAmount(
+              accountId,
+              amountDiff,
+              session,
+            )
+          }
         }
 
         return await this.operationDatabaseService.updateOperation(
@@ -106,11 +104,10 @@ export class OperationService {
     )
   }
 
+  // TODO: - Recalculate Summary which affected by Operation date and amount on delete operation;
   async deleteOperation(id: Types.ObjectId): Promise<void> {
     return this.transactionService.executeInTransaction(
       async (session: ClientSession) => {
-        // TODO: - Recalculate Summary which affected by Operation date and amount on delete operation;
-
         const { accountId, amount } = await this.getOperationById(id)
 
         await this.accountService.updateAccountBalanceByAmount(
@@ -135,13 +132,13 @@ export class OperationService {
 
     if (isArchived) {
       operationCategoryErrors.push(
-        'Selected category for this operation is archived',
+        'Specified category for this operation is archived',
       )
     }
 
     if (!operationUserId.equals(userId)) {
       operationCategoryErrors.push(
-        'Selected category userId must be equal to this operation userId',
+        'Specified in operation userId must match a userId in specified category',
       )
     }
 
