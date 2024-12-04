@@ -8,11 +8,17 @@ import {
   InternalServerErrorException,
   NestInterceptor,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common'
 import { Observable, throwError } from 'rxjs'
 import { catchError } from 'rxjs/operators'
 
-import { ConflictError, NotFoundError, ValidationError } from '../errors/errors'
+import {
+  ConflictError,
+  NotFoundError,
+  UnprocessableError,
+  ValidationError,
+} from '../errors/errors'
 
 @Injectable()
 export class ErrorsInterceptor implements NestInterceptor {
@@ -33,6 +39,11 @@ export class ErrorsInterceptor implements NestInterceptor {
           if (error instanceof ValidationError) {
             console.info(error)
             return new BadRequestException(error.message)
+          }
+
+          if (error instanceof UnprocessableError) {
+            console.info(error)
+            return new UnprocessableEntityException(error.message)
           }
 
           if (error instanceof HttpException) {

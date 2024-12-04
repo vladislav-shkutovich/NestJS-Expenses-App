@@ -5,6 +5,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  NotEquals,
 } from 'class-validator'
 import { Types } from 'mongoose'
 
@@ -25,6 +26,7 @@ export class CreateOperationDto {
   categoryId: Types.ObjectId
 
   @IsNumber()
+  @NotEquals(0)
   amount: number
 
   @IsDate()

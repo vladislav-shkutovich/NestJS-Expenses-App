@@ -1,9 +1,10 @@
 import { Type } from 'class-transformer'
-import { IsDate, IsOptional } from 'class-validator'
+import { IsDate, IsEnum, IsOptional } from 'class-validator'
 import { Types } from 'mongoose'
 
 import { IsValidObjectId } from '../../common/decorators/is-valid-objectid.decorator'
 import { TransformStringToObjectId } from '../../common/decorators/transform-string-to-objectid.decorator'
+import { OperationType } from '../operation.types'
 
 export class OperationQueryParamsDto {
   @TransformStringToObjectId()
@@ -29,4 +30,8 @@ export class OperationQueryParamsDto {
   @TransformStringToObjectId()
   @IsValidObjectId()
   accountId?: Types.ObjectId
+
+  @IsOptional()
+  @IsEnum(OperationType)
+  type?: OperationType
 }
