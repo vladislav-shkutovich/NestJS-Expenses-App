@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer'
 import {
   IsDate,
+  IsNegative,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -12,10 +13,26 @@ import { Types } from 'mongoose'
 
 import { IsValidObjectId } from '../../common/decorators/is-valid-objectid.decorator'
 import { TransformStringToObjectId } from '../../common/decorators/transform-string-to-objectid.decorator'
-import {
-  FromTransferTargetDto,
-  ToTransferTargetDto,
-} from './transfer-target.dto'
+
+class FromTransferTargetDto {
+  @TransformStringToObjectId()
+  @IsValidObjectId()
+  accountId: Types.ObjectId
+
+  @IsNumber()
+  @IsNegative()
+  amount: number
+}
+
+class ToTransferTargetDto {
+  @TransformStringToObjectId()
+  @IsValidObjectId()
+  accountId: Types.ObjectId
+
+  @IsNumber()
+  @IsPositive()
+  amount: number
+}
 
 export class CreateTransferDto {
   @TransformStringToObjectId()
