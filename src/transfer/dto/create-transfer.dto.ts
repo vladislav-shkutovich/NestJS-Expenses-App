@@ -12,7 +12,10 @@ import { Types } from 'mongoose'
 
 import { IsValidObjectId } from '../../common/decorators/is-valid-objectid.decorator'
 import { TransformStringToObjectId } from '../../common/decorators/transform-string-to-objectid.decorator'
-import { TransferTargetDto } from './transfer-target.dto'
+import {
+  FromTransferTargetDto,
+  ToTransferTargetDto,
+} from './transfer-target.dto'
 
 export class CreateTransferDto {
   @TransformStringToObjectId()
@@ -20,12 +23,12 @@ export class CreateTransferDto {
   userId: Types.ObjectId
 
   @ValidateNested()
-  @Type(() => TransferTargetDto)
-  from: TransferTargetDto
+  @Type(() => FromTransferTargetDto)
+  from: FromTransferTargetDto
 
   @ValidateNested()
-  @Type(() => TransferTargetDto)
-  to: TransferTargetDto
+  @Type(() => ToTransferTargetDto)
+  to: ToTransferTargetDto
 
   @IsNumber()
   @IsPositive()

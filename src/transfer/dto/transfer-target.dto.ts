@@ -1,18 +1,25 @@
-import { IsISO4217CurrencyCode, IsNumber, NotEquals } from 'class-validator'
+import { IsNegative, IsNumber, IsPositive } from 'class-validator'
 import { Types } from 'mongoose'
 
 import { IsValidObjectId } from '../../common/decorators/is-valid-objectid.decorator'
 import { TransformStringToObjectId } from '../../common/decorators/transform-string-to-objectid.decorator'
 
-export class TransferTargetDto {
+export class FromTransferTargetDto {
   @TransformStringToObjectId()
   @IsValidObjectId()
   accountId: Types.ObjectId
 
-  @IsISO4217CurrencyCode()
-  currencyCode: string
+  @IsNumber()
+  @IsNegative()
+  amount: number
+}
+
+export class ToTransferTargetDto {
+  @TransformStringToObjectId()
+  @IsValidObjectId()
+  accountId: Types.ObjectId
 
   @IsNumber()
-  @NotEquals(0)
+  @IsPositive()
   amount: number
 }
