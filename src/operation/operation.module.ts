@@ -20,6 +20,6 @@ import { OperationSchema } from './schemas/operation.schema'
   ],
   controllers: [OperationController],
   providers: [OperationService, OperationDatabaseService, TransactionService],
-  exports: [OperationDatabaseService],
+  exports: [OperationService],
 })
 export class OperationModule {}

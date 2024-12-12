@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common'
+import { forwardRef, Inject, Injectable } from '@nestjs/common'
 
 import { Types } from 'mongoose'
 import { UnprocessableError } from '../common/errors/errors'
-import { OperationDatabaseService } from '../operation/operation.database.service'
+import { OperationService } from '../operation/operation.service'
 import { UserService } from '../user/user.service'
 import { CategoryDatabaseService } from './category.database.service'
 import { UpdateCategoryOperators } from './category.types'
@@ -15,7 +15,8 @@ import type { Category } from './schemas/category.schema'
 export class CategoryService {
   constructor(
     private readonly categoryDatabaseService: CategoryDatabaseService,
-    private readonly operationDatabaseService: OperationDatabaseService,
+    @Inject(forwardRef(() => OperationService))
+    private readonly operationService: OperationService,
     private readonly userService: UserService,
   ) {}
 
@@ -70,7 +71,7 @@ export class CategoryService {
 
   async deleteCategory(id: Types.ObjectId): Promise<void> {
     const isCategoryUsedInOperations =
-      await this.operationDatabaseService.isOperationExistByQuery({
+      await this.operationService.isOperationExistByQuery({
         categoryId: id,
       })
 

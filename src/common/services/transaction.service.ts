@@ -16,7 +16,7 @@ export class TransactionService {
       const result = await transactionCallback(session)
       await session.commitTransaction()
 
-      console.log('Transaction committed successfully')
+      console.debug('Transaction committed successfully')
 
       return result
     } catch (error) {

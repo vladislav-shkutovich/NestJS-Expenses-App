@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common'
-import { ClientSession, Types } from 'mongoose'
+import { forwardRef, Inject, Injectable } from '@nestjs/common'
+import { ClientSession, FilterQuery, Types } from 'mongoose'
 
 import { AccountService } from '../account/account.service'
 import { CategoryService } from '../category/category.service'
@@ -16,6 +16,7 @@ export class OperationService {
   constructor(
     private readonly operationDatabaseService: OperationDatabaseService,
     private readonly accountService: AccountService,
+    @Inject(forwardRef(() => CategoryService))
     private readonly categoryService: CategoryService,
     private readonly transactionService: TransactionService,
   ) {}
@@ -145,5 +146,11 @@ export class OperationService {
     if (operationCategoryErrors.length > 0) {
       throw new ValidationError(operationCategoryErrors.join('. '))
     }
+  }
+
+  async isOperationExistByQuery(
+    query: FilterQuery<Operation>,
+  ): Promise<boolean> {
+    return await this.operationDatabaseService.isOperationExistByQuery(query)
   }
 }

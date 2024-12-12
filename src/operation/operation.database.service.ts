@@ -40,28 +40,21 @@ export class OperationDatabaseService {
     options: OperationQueryParamsDto,
   ): Promise<Operation[]> {
     const { dateFrom, dateTo, type, ...restOptions } = removeUndefined(options)
-    const query: FilterQuery<Operation> = restOptions
 
-    if (dateFrom || dateTo) {
-      query.date = {}
-
-      if (dateFrom) {
-        query.date.$gte = dateFrom
-      }
-
-      if (dateTo) {
-        query.date.$lte = dateTo
-      }
-    }
-
-    if (type) {
-      if (type === OperationType.INCOME) {
-        query.amount = { $gt: 0 }
-      }
-
-      if (type === OperationType.WITHDRAWAL) {
-        query.amount = { $lt: 0 }
-      }
+    const query: FilterQuery<Operation> = {
+      ...restOptions,
+      ...((dateFrom || dateTo) && {
+        date: {
+          ...(dateFrom && { $gte: dateFrom }),
+          ...(dateTo && { $lte: dateTo }),
+        },
+      }),
+      ...(type && {
+        amount: {
+          ...(type === OperationType.INCOME && { $gt: 0 }),
+          ...(type === OperationType.WITHDRAWAL && { $lt: 0 }),
+        },
+      }),
     }
 
     return await this.operationModel.find(query).lean()
