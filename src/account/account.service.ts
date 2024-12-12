@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 
-import { ClientSession, Types } from 'mongoose'
+import { Types } from 'mongoose'
 import { ConflictError, ValidationError } from '../common/errors/errors'
 import { UserService } from '../user/user.service'
 import { AccountDatabaseService } from './account.database.service'
@@ -71,12 +71,10 @@ export class AccountService {
   async updateAccountBalanceByAmount(
     id: Types.ObjectId,
     amount: number,
-    session?: ClientSession,
   ): Promise<Account> {
     return await this.accountDatabaseService.updateAccountBalanceByAmount(
       id,
       amount,
-      session,
     )
   }
 }

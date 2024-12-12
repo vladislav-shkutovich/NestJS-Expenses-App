@@ -1,10 +1,10 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
-import { ClientSession, FilterQuery, Types } from 'mongoose'
+import { FilterQuery, Types } from 'mongoose'
 
 import { AccountService } from '../account/account.service'
 import { CategoryService } from '../category/category.service'
 import { ValidationError } from '../common/errors/errors'
-import { TransactionService } from '../common/services/transaction.service'
+import { TransactionService } from '../transaction/transaction.service'
 import { CreateOperationDto } from './dto/create-operation.dto'
 import { OperationQueryParamsDto } from './dto/operation-query-params.dto'
 import { UpdateOperationDto } from './dto/update-operation.dto'
@@ -25,34 +25,28 @@ export class OperationService {
   async createOperation(
     createOperationDto: CreateOperationDto,
   ): Promise<Operation> {
-    return this.transactionService.executeInTransaction(
-      async (session: ClientSession) => {
-        const { accountId, userId, categoryId, amount } = createOperationDto
+    return this.transactionService.executeInTransaction(async () => {
+      const { accountId, userId, categoryId, amount } = createOperationDto
 
-        const { currencyCode, userId: accountUserId } =
-          await this.accountService.updateAccountBalanceByAmount(
-            accountId,
-            amount,
-            session,
-          )
-
-        if (!userId.equals(accountUserId)) {
-          throw new ValidationError(
-            'Specified in operation userId must match a userId in specified account',
-          )
-        }
-
-        await this.validateOperationCategory(categoryId, userId)
-
-        return await this.operationDatabaseService.createOperation(
-          {
-            ...createOperationDto,
-            currencyCode,
-          },
-          session,
+      const { currencyCode, userId: accountUserId } =
+        await this.accountService.updateAccountBalanceByAmount(
+          accountId,
+          amount,
         )
-      },
-    )
+
+      if (!userId.equals(accountUserId)) {
+        throw new ValidationError(
+          'Specified in operation userId must match a userId in specified account',
+        )
+      }
+
+      await this.validateOperationCategory(categoryId, userId)
+
+      return await this.operationDatabaseService.createOperation({
+        ...createOperationDto,
+        currencyCode,
+      })
+    })
   }
 
   async getOperationById(id: Types.ObjectId): Promise<Operation> {
@@ -70,56 +64,46 @@ export class OperationService {
     id: Types.ObjectId,
     updateOperationDto: UpdateOperationDto,
   ): Promise<Operation> {
-    return this.transactionService.executeInTransaction(
-      async (session: ClientSession) => {
-        const { categoryId, amount } = updateOperationDto
+    return this.transactionService.executeInTransaction(async () => {
+      const { categoryId, amount } = updateOperationDto
 
-        if (categoryId || amount) {
-          const {
-            accountId,
-            userId,
-            amount: prevAmount,
-          } = await this.getOperationById(id)
+      if (categoryId || amount) {
+        const {
+          accountId,
+          userId,
+          amount: prevAmount,
+        } = await this.getOperationById(id)
 
-          if (categoryId) {
-            await this.validateOperationCategory(categoryId, userId)
-          }
-
-          if (amount) {
-            const amountDiff = amount - prevAmount
-
-            await this.accountService.updateAccountBalanceByAmount(
-              accountId,
-              amountDiff,
-              session,
-            )
-          }
+        if (categoryId) {
+          await this.validateOperationCategory(categoryId, userId)
         }
 
-        return await this.operationDatabaseService.updateOperation(
-          id,
-          updateOperationDto,
-          session,
-        )
-      },
-    )
+        if (amount) {
+          const amountDiff = amount - prevAmount
+
+          await this.accountService.updateAccountBalanceByAmount(
+            accountId,
+            amountDiff,
+          )
+        }
+      }
+
+      return await this.operationDatabaseService.updateOperation(
+        id,
+        updateOperationDto,
+      )
+    })
   }
 
   // TODO: - Recalculate Summary which affected by Operation date and amount on delete operation;
   async deleteOperation(id: Types.ObjectId): Promise<void> {
-    return this.transactionService.executeInTransaction(
-      async (session: ClientSession) => {
-        const { accountId, amount } = await this.getOperationById(id)
+    return this.transactionService.executeInTransaction(async () => {
+      const { accountId, amount } = await this.getOperationById(id)
 
-        await this.accountService.updateAccountBalanceByAmount(
-          accountId,
-          -amount,
-          session,
-        )
+      await this.accountService.updateAccountBalanceByAmount(accountId, -amount)
 
-        return await this.operationDatabaseService.deleteOperation(id, session)
-      },
-    )
+      return await this.operationDatabaseService.deleteOperation(id)
+    })
   }
 
   private async validateOperationCategory(
