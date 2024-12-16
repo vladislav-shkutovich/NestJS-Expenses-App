@@ -7,7 +7,6 @@ import { AccountModule } from './account/account.module'
 import { AuthModule } from './auth/auth.module'
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard'
 import { CategoryModule } from './category/category.module'
-import { TransactionService } from './common/services/transaction.service'
 import { throwMissingEnvVar } from './common/utils/env.utils'
 import { CurrencyModule } from './currency/currency.module'
 import { ExchangeRateModule } from './exchange-rate/exchange-rate.module'
@@ -46,7 +45,6 @@ import { UserModule } from './user/user.module'
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
-    TransactionService,
   ],
 })
 export class AppModule {}

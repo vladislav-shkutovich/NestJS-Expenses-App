@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { ClientSession, FilterQuery, Model, Types } from 'mongoose'
+import { FilterQuery, Model, Types } from 'mongoose'
 
 import { OPERATION_MODEL } from '../common/constants/database.constants'
 import { NotFoundError } from '../common/errors/errors'
 import { removeUndefined } from '../common/utils/formatting.utils'
+import { getSession } from '../transaction/transaction.context'
 import { OperationQueryParamsDto } from './dto/operation-query-params.dto'
 import { UpdateOperationDto } from './dto/update-operation.dto'
 import { CreateOperationContent, OperationType } from './operation.types'
@@ -18,8 +19,9 @@ export class OperationDatabaseService {
 
   async createOperation(
     createOperationContent: CreateOperationContent,
-    session?: ClientSession,
   ): Promise<Operation> {
+    const session = getSession()
+
     const operationDoc = new this.operationModel(createOperationContent)
     const createdOperation = await operationDoc.save({ session })
 
@@ -40,28 +42,21 @@ export class OperationDatabaseService {
     options: OperationQueryParamsDto,
   ): Promise<Operation[]> {
     const { dateFrom, dateTo, type, ...restOptions } = removeUndefined(options)
-    const query: FilterQuery<Operation> = restOptions
 
-    if (dateFrom || dateTo) {
-      query.date = {}
-
-      if (dateFrom) {
-        query.date.$gte = dateFrom
-      }
-
-      if (dateTo) {
-        query.date.$lte = dateTo
-      }
-    }
-
-    if (type) {
-      if (type === OperationType.INCOME) {
-        query.amount = { $gt: 0 }
-      }
-
-      if (type === OperationType.WITHDRAWAL) {
-        query.amount = { $lt: 0 }
-      }
+    const query: FilterQuery<Operation> = {
+      ...restOptions,
+      ...((dateFrom || dateTo) && {
+        date: {
+          ...(dateFrom && { $gte: dateFrom }),
+          ...(dateTo && { $lte: dateTo }),
+        },
+      }),
+      ...(type && {
+        amount: {
+          ...(type === OperationType.INCOME && { $gt: 0 }),
+          ...(type === OperationType.WITHDRAWAL && { $lt: 0 }),
+        },
+      }),
     }
 
     return await this.operationModel.find(query).lean()
@@ -70,8 +65,9 @@ export class OperationDatabaseService {
   async updateOperation(
     id: Types.ObjectId,
     updateOperationDto: UpdateOperationDto,
-    session: ClientSession,
   ): Promise<Operation> {
+    const session = getSession()
+
     const updatedOperation = await this.operationModel
       .findByIdAndUpdate(id, updateOperationDto, {
         new: true,
@@ -86,10 +82,9 @@ export class OperationDatabaseService {
     return updatedOperation
   }
 
-  async deleteOperation(
-    id: Types.ObjectId,
-    session?: ClientSession,
-  ): Promise<void> {
+  async deleteOperation(id: Types.ObjectId): Promise<void> {
+    const session = getSession()
+
     const { deletedCount } = await this.operationModel.deleteOne(
       { _id: id },
       { session },
