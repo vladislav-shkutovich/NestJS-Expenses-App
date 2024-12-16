@@ -5,10 +5,10 @@ import { FilterQuery, Model, Types } from 'mongoose'
 import { TRANSFER_MODEL } from '../common/constants/database.constants'
 import { NotFoundError } from '../common/errors/errors'
 import { removeUndefined } from '../common/utils/formatting.utils'
-import { CreateTransferDto } from './dto/create-transfer.dto'
 import { TransferQueryParamsDto } from './dto/transfer-query-params.dto'
 import { UpdateTransferDto } from './dto/update-transfer.dto'
 import type { Transfer } from './schemas/transfer.schema'
+import { CreateTransferContent } from './transfer.types'
 
 @Injectable()
 export class TransferDatabaseService {
@@ -17,9 +17,9 @@ export class TransferDatabaseService {
   ) {}
 
   async createTransfer(
-    createTransferDto: CreateTransferDto,
+    createTransferContent: CreateTransferContent,
   ): Promise<Transfer> {
-    const transferDoc = new this.transferModel(createTransferDto)
+    const transferDoc = new this.transferModel(createTransferContent)
     const createdTransfer = await transferDoc.save()
 
     return createdTransfer.toObject()
