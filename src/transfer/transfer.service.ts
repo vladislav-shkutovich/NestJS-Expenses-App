@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common'
+import Decimal from 'decimal.js-light'
 import { Types } from 'mongoose'
 
 import { AccountService } from '../account/account.service'
+import { AMOUNT_DECIMAL_PLACES } from '../common/constants/formatting.constants'
 import { ValidationError } from '../common/errors/errors'
 import { CreateTransferDto } from './dto/create-transfer.dto'
 import { TransferQueryParamsDto } from './dto/transfer-query-params.dto'
@@ -24,8 +26,11 @@ export class TransferService {
       userId,
       from: { accountId: fromAccountId, amount: fromAmount },
       to: { accountId: toAccountId, amount: toAmount },
+      exchangeRate,
       description,
     } = createTransferDto
+
+    this.validateTransferConsistence(fromAmount, toAmount, exchangeRate)
 
     const [
       {
@@ -93,5 +98,28 @@ export class TransferService {
 
   async deleteTransfer(id: Types.ObjectId): Promise<void> {
     return await this.transferDatabaseService.deleteTransfer(id)
+  }
+
+  private validateTransferConsistence(
+    fromAmount: number,
+    toAmount: number,
+    exchangeRate: number,
+  ): void {
+    const fromAmountDecimal = new Decimal(fromAmount)
+    const toAmountDecimal = new Decimal(toAmount)
+    const exchangeRateDecimal = new Decimal(exchangeRate)
+
+    const calculatedToAmount = fromAmountDecimal
+      .dividedBy(exchangeRateDecimal)
+      .negated()
+      .toDecimalPlaces(AMOUNT_DECIMAL_PLACES)
+
+    const isTransferConsistent = calculatedToAmount.equals(toAmountDecimal)
+
+    if (!isTransferConsistent) {
+      throw new ValidationError(
+        'Transfer amounts are inconsistent with provided exchange rate',
+      )
+    }
   }
 }
