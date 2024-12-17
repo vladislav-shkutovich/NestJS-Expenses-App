@@ -3,7 +3,6 @@ import {
   IsDate,
   IsNegative,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsPositive,
   IsString,
@@ -11,6 +10,8 @@ import {
 } from 'class-validator'
 import { Types } from 'mongoose'
 
+import { IsValidAmount } from '../../common/decorators/is-valid-amount.decorator'
+import { IsValidExchangeRate } from '../../common/decorators/is-valid-exchange-rate.decorator'
 import { IsValidObjectId } from '../../common/decorators/is-valid-objectid.decorator'
 import { TransformStringToObjectId } from '../../common/decorators/transform-string-to-objectid.decorator'
 
@@ -19,7 +20,7 @@ class FromTransferTargetDto {
   @IsValidObjectId()
   accountId: Types.ObjectId
 
-  @IsNumber()
+  @IsValidAmount()
   @IsNegative()
   amount: number
 }
@@ -29,7 +30,7 @@ class ToTransferTargetDto {
   @IsValidObjectId()
   accountId: Types.ObjectId
 
-  @IsNumber()
+  @IsValidAmount()
   @IsPositive()
   amount: number
 }
@@ -47,8 +48,7 @@ export class CreateTransferDto {
   @Type(() => ToTransferTargetDto)
   to: ToTransferTargetDto
 
-  @IsNumber()
-  @IsPositive()
+  @IsValidExchangeRate()
   exchangeRate: number
 
   @IsDate()

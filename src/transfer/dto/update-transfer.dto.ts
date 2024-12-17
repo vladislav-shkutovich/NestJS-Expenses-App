@@ -3,22 +3,24 @@ import {
   IsDate,
   IsNegative,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsPositive,
   IsString,
   ValidateNested,
 } from 'class-validator'
 
+import { IsValidAmount } from '../../common/decorators/is-valid-amount.decorator'
+import { IsValidExchangeRate } from '../../common/decorators/is-valid-exchange-rate.decorator'
+
 class FromTransferTargetDto {
-  @IsNumber()
+  @IsValidAmount()
   @IsNegative()
   @IsOptional()
   amount?: number
 }
 
 class ToTransferTargetDto {
-  @IsNumber()
+  @IsValidAmount()
   @IsPositive()
   @IsOptional()
   amount?: number
@@ -35,8 +37,7 @@ export class UpdateTransferDto {
   @IsOptional()
   to?: ToTransferTargetDto
 
-  @IsNumber()
-  @IsPositive()
+  @IsValidExchangeRate()
   @IsOptional()
   exchangeRate?: number
 
