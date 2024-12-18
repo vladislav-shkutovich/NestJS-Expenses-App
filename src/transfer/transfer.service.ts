@@ -5,6 +5,7 @@ import { Types } from 'mongoose'
 import { AccountService } from '../account/account.service'
 import { AMOUNT_DECIMAL_PLACES } from '../common/constants/formatting.constants'
 import { ValidationError } from '../common/errors/errors'
+import { TransactionService } from '../transaction/transaction.service'
 import { CreateTransferDto } from './dto/create-transfer.dto'
 import { TransferQueryParamsDto } from './dto/transfer-query-params.dto'
 import { UpdateTransferDto } from './dto/update-transfer.dto'
@@ -15,66 +16,72 @@ import { CreateTransferContent, UpdateTransferContent } from './transfer.types'
 @Injectable()
 export class TransferService {
   constructor(
-    private readonly transferDatabaseService: TransferDatabaseService,
     private readonly accountService: AccountService,
+    private readonly transactionService: TransactionService,
+    private readonly transferDatabaseService: TransferDatabaseService,
   ) {}
 
   // TODO: - Recalculate Summary which affected by Transfer date and amounts on create transfer;
   async createTransfer(
     createTransferDto: CreateTransferDto,
   ): Promise<Transfer> {
-    const {
-      userId,
-      from: { accountId: fromAccountId, amount: fromAmount },
-      to: { accountId: toAccountId, amount: toAmount },
-      exchangeRate,
-      description,
-    } = createTransferDto
+    return this.transactionService.executeInTransaction(async () => {
+      const {
+        userId,
+        from: { accountId: fromAccountId, amount: fromAmount },
+        to: { accountId: toAccountId, amount: toAmount },
+        exchangeRate,
+        description,
+      } = createTransferDto
 
-    this.validateTransferConsistence(fromAmount, toAmount, exchangeRate)
+      this.validateTransferConsistence(fromAmount, toAmount, exchangeRate)
 
-    const [
-      {
-        currencyCode: fromCurrencyCode,
-        userId: fromAccountUserId,
-        name: fromAccountName,
-      },
-      {
-        currencyCode: toCurrencyCode,
-        userId: toAccountUserId,
-        name: toAccountName,
-      },
-    ] = await Promise.all([
-      this.accountService.updateAccountBalanceByAmount(
-        fromAccountId,
-        fromAmount,
-      ),
-      this.accountService.updateAccountBalanceByAmount(toAccountId, toAmount),
-    ])
+      const [
+        {
+          currencyCode: fromCurrencyCode,
+          userId: fromAccountUserId,
+          name: fromAccountName,
+        },
+        {
+          currencyCode: toCurrencyCode,
+          userId: toAccountUserId,
+          name: toAccountName,
+        },
+      ] = await Promise.all([
+        this.accountService.updateAccountBalanceByAmount(
+          fromAccountId,
+          fromAmount,
+        ),
+        this.accountService.updateAccountBalanceByAmount(toAccountId, toAmount),
+      ])
 
-    if (!userId.equals(fromAccountUserId) || !userId.equals(toAccountUserId)) {
-      throw new ValidationError(
-        'Specified in transfer userId must match a userId in both specified accounts',
+      if (
+        !userId.equals(fromAccountUserId) ||
+        !userId.equals(toAccountUserId)
+      ) {
+        throw new ValidationError(
+          'Specified in transfer userId must match a userId in both specified accounts',
+        )
+      }
+
+      const createTransferContent: CreateTransferContent = {
+        ...createTransferDto,
+        from: {
+          ...createTransferDto.from,
+          currencyCode: fromCurrencyCode,
+        },
+        to: {
+          ...createTransferDto.to,
+          currencyCode: toCurrencyCode,
+        },
+        description:
+          description || `Transfer from ${fromAccountName} to ${toAccountName}`,
+      }
+
+      return await this.transferDatabaseService.createTransfer(
+        createTransferContent,
       )
-    }
-
-    const createTransferContent: CreateTransferContent = {
-      ...createTransferDto,
-      from: {
-        ...createTransferDto.from,
-        currencyCode: fromCurrencyCode,
-      },
-      to: {
-        ...createTransferDto.to,
-        currencyCode: toCurrencyCode,
-      },
-      description:
-        description || `Transfer from ${fromAccountName} to ${toAccountName}`,
-    }
-
-    return await this.transferDatabaseService.createTransfer(
-      createTransferContent,
-    )
+    })
   }
 
   async getTransferById(id: Types.ObjectId): Promise<Transfer> {
@@ -92,84 +99,88 @@ export class TransferService {
     id: Types.ObjectId,
     updateTransferDto: UpdateTransferDto,
   ): Promise<Transfer> {
-    const { from, to, ...restUpdateTransferParams } = updateTransferDto
-    const updateTransferContent: UpdateTransferContent =
-      restUpdateTransferParams
-    const { exchangeRate } = updateTransferContent
+    return this.transactionService.executeInTransaction(async () => {
+      const { from, to, ...restUpdateTransferParams } = updateTransferDto
+      const updateTransferContent: UpdateTransferContent =
+        restUpdateTransferParams
+      const { exchangeRate } = updateTransferContent
 
-    if (from || to || exchangeRate) {
-      const fromAmount = from?.amount
-      const toAmount = to?.amount
+      if (from || to || exchangeRate) {
+        const fromAmount = from?.amount
+        const toAmount = to?.amount
 
-      const {
-        exchangeRate: prevExchangeRate,
-        from: prevFrom,
-        to: prevTo,
-      } = await this.getTransferById(id)
-      const { accountId: fromAccountId, amount: prevFromAmount } = prevFrom
-      const { accountId: toAccountId, amount: prevToAmount } = prevTo
+        const {
+          exchangeRate: prevExchangeRate,
+          from: prevFrom,
+          to: prevTo,
+        } = await this.getTransferById(id)
+        const { accountId: fromAccountId, amount: prevFromAmount } = prevFrom
+        const { accountId: toAccountId, amount: prevToAmount } = prevTo
 
-      this.validateTransferConsistence(
-        fromAmount || prevFromAmount,
-        toAmount || prevToAmount,
-        exchangeRate || prevExchangeRate,
+        this.validateTransferConsistence(
+          fromAmount || prevFromAmount,
+          toAmount || prevToAmount,
+          exchangeRate || prevExchangeRate,
+        )
+
+        if (fromAmount) {
+          updateTransferContent.from = {
+            ...prevFrom,
+            amount: fromAmount,
+          }
+
+          const fromAmountDiff = fromAmount - prevFromAmount
+
+          await this.accountService.updateAccountBalanceByAmount(
+            fromAccountId,
+            fromAmountDiff,
+          )
+        }
+
+        if (toAmount) {
+          updateTransferContent.to = {
+            ...prevTo,
+            amount: toAmount,
+          }
+
+          const toAmountDiff = toAmount - prevToAmount
+
+          await this.accountService.updateAccountBalanceByAmount(
+            toAccountId,
+            toAmountDiff,
+          )
+        }
+      }
+
+      return await this.transferDatabaseService.updateTransfer(
+        id,
+        updateTransferContent,
       )
-
-      if (fromAmount) {
-        updateTransferContent.from = {
-          ...prevFrom,
-          amount: fromAmount,
-        }
-
-        const fromAmountDiff = fromAmount - prevFromAmount
-
-        await this.accountService.updateAccountBalanceByAmount(
-          fromAccountId,
-          fromAmountDiff,
-        )
-      }
-
-      if (toAmount) {
-        updateTransferContent.to = {
-          ...prevTo,
-          amount: toAmount,
-        }
-
-        const toAmountDiff = toAmount - prevToAmount
-
-        await this.accountService.updateAccountBalanceByAmount(
-          toAccountId,
-          toAmountDiff,
-        )
-      }
-    }
-
-    return await this.transferDatabaseService.updateTransfer(
-      id,
-      updateTransferContent,
-    )
+    })
   }
 
   // TODO: - Recalculate Summary which affected by Transfer amounts on delete transfer;
   async deleteTransfer(id: Types.ObjectId): Promise<void> {
-    const {
-      from: { accountId: fromAccountId, amount: fromAmount },
-      to: { accountId: toAccountId, amount: toAmount },
-    } = await this.getTransferById(id)
+    return this.transactionService.executeInTransaction(async () => {
+      const {
+        from: { accountId: fromAccountId, amount: fromAmount },
+        to: { accountId: toAccountId, amount: toAmount },
+      } = await this.getTransferById(id)
 
-    // "-" sign before the amounts is required, since it is necessary to reduce the accounts balances by its value
-    Promise.all([
-      await this.accountService.updateAccountBalanceByAmount(
-        toAccountId,
-        -toAmount,
-      ),
-      await this.accountService.updateAccountBalanceByAmount(
-        fromAccountId,
-        -fromAmount,
-      ),
-    ])
+      // "-" sign before the amounts is required, since it is necessary to reduce the accounts balances by its value
+      Promise.all([
+        await this.accountService.updateAccountBalanceByAmount(
+          toAccountId,
+          -toAmount,
+        ),
+        await this.accountService.updateAccountBalanceByAmount(
+          fromAccountId,
+          -fromAmount,
+        ),
+      ])
 
-    return await this.transferDatabaseService.deleteTransfer(id)
+      return await this.transferDatabaseService.deleteTransfer(id)
+    })
   }
 
   private validateTransferConsistence(

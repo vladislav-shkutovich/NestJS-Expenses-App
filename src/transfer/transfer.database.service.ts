@@ -5,6 +5,7 @@ import { FilterQuery, Model, Types } from 'mongoose'
 import { TRANSFER_MODEL } from '../common/constants/database.constants'
 import { NotFoundError } from '../common/errors/errors'
 import { removeUndefined } from '../common/utils/formatting.utils'
+import { getSession } from '../transaction/transaction.context'
 import { TransferQueryParamsDto } from './dto/transfer-query-params.dto'
 import type { Transfer } from './schemas/transfer.schema'
 import { CreateTransferContent, UpdateTransferContent } from './transfer.types'
@@ -18,8 +19,10 @@ export class TransferDatabaseService {
   async createTransfer(
     createTransferContent: CreateTransferContent,
   ): Promise<Transfer> {
+    const session = getSession()
+
     const transferDoc = new this.transferModel(createTransferContent)
-    const createdTransfer = await transferDoc.save()
+    const createdTransfer = await transferDoc.save({ session })
 
     return createdTransfer.toObject()
   }
@@ -76,9 +79,12 @@ export class TransferDatabaseService {
     id: Types.ObjectId,
     updateTransferDto: UpdateTransferContent,
   ): Promise<Transfer> {
+    const session = getSession()
+
     const updatedTransfer = await this.transferModel
       .findByIdAndUpdate(id, updateTransferDto, {
         new: true,
+        session,
       })
       .lean()
 
@@ -90,7 +96,12 @@ export class TransferDatabaseService {
   }
 
   async deleteTransfer(id: Types.ObjectId): Promise<void> {
-    const { deletedCount } = await this.transferModel.deleteOne({ _id: id })
+    const session = getSession()
+
+    const { deletedCount } = await this.transferModel.deleteOne(
+      { _id: id },
+      { session },
+    )
 
     if (deletedCount === 0) {
       throw new NotFoundError(`Transfer with id ${id} not found`)
