@@ -152,6 +152,23 @@ export class TransferService {
 
   // TODO: - Recalculate Summary which affected by Transfer amounts on delete transfer;
   async deleteTransfer(id: Types.ObjectId): Promise<void> {
+    const {
+      from: { accountId: fromAccountId, amount: fromAmount },
+      to: { accountId: toAccountId, amount: toAmount },
+    } = await this.getTransferById(id)
+
+    // "-" sign before the amounts is required, since it is necessary to reduce the accounts balances by its value
+    Promise.all([
+      await this.accountService.updateAccountBalanceByAmount(
+        toAccountId,
+        -toAmount,
+      ),
+      await this.accountService.updateAccountBalanceByAmount(
+        fromAccountId,
+        -fromAmount,
+      ),
+    ])
+
     return await this.transferDatabaseService.deleteTransfer(id)
   }
 

@@ -100,6 +100,7 @@ export class OperationService {
     return this.transactionService.executeInTransaction(async () => {
       const { accountId, amount } = await this.getOperationById(id)
 
+      // "-" sign before amount is required, since it's necessary to reduce the account balance by its value
       await this.accountService.updateAccountBalanceByAmount(accountId, -amount)
 
       return await this.operationDatabaseService.deleteOperation(id)
