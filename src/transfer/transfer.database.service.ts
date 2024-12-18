@@ -6,9 +6,8 @@ import { TRANSFER_MODEL } from '../common/constants/database.constants'
 import { NotFoundError } from '../common/errors/errors'
 import { removeUndefined } from '../common/utils/formatting.utils'
 import { TransferQueryParamsDto } from './dto/transfer-query-params.dto'
-import { UpdateTransferDto } from './dto/update-transfer.dto'
 import type { Transfer } from './schemas/transfer.schema'
-import { CreateTransferContent } from './transfer.types'
+import { CreateTransferContent, UpdateTransferContent } from './transfer.types'
 
 @Injectable()
 export class TransferDatabaseService {
@@ -75,7 +74,7 @@ export class TransferDatabaseService {
 
   async updateTransfer(
     id: Types.ObjectId,
-    updateTransferDto: UpdateTransferDto,
+    updateTransferDto: UpdateTransferContent,
   ): Promise<Transfer> {
     const updatedTransfer = await this.transferModel
       .findByIdAndUpdate(id, updateTransferDto, {

@@ -10,7 +10,7 @@ import { TransferQueryParamsDto } from './dto/transfer-query-params.dto'
 import { UpdateTransferDto } from './dto/update-transfer.dto'
 import type { Transfer } from './schemas/transfer.schema'
 import { TransferDatabaseService } from './transfer.database.service'
-import { CreateTransferContent } from './transfer.types'
+import { CreateTransferContent, UpdateTransferContent } from './transfer.types'
 
 @Injectable()
 export class TransferService {
@@ -90,9 +90,61 @@ export class TransferService {
     id: Types.ObjectId,
     updateTransferDto: UpdateTransferDto,
   ): Promise<Transfer> {
+    const { from, to, ...restUpdateTransferParams } = updateTransferDto
+    const updateTransferContent: UpdateTransferContent =
+      restUpdateTransferParams
+    const { exchangeRate } = updateTransferContent
+
+    if (from || to || exchangeRate) {
+      const fromAmount = from?.amount
+      const toAmount = to?.amount
+
+      const {
+        exchangeRate: prevExchangeRate,
+        from: prevFrom,
+        to: prevTo,
+      } = await this.getTransferById(id)
+      const { accountId: fromAccountId, amount: prevFromAmount } = prevFrom
+      const { accountId: toAccountId, amount: prevToAmount } = prevTo
+
+      this.validateTransferConsistence(
+        fromAmount || prevFromAmount,
+        toAmount || prevToAmount,
+        exchangeRate || prevExchangeRate,
+      )
+
+      if (fromAmount) {
+        updateTransferContent.from = {
+          ...prevFrom,
+          amount: fromAmount,
+        }
+
+        const fromAmountDiff = fromAmount - prevFromAmount
+
+        await this.accountService.updateAccountBalanceByAmount(
+          fromAccountId,
+          fromAmountDiff,
+        )
+      }
+
+      if (toAmount) {
+        updateTransferContent.to = {
+          ...prevTo,
+          amount: toAmount,
+        }
+
+        const toAmountDiff = toAmount - prevToAmount
+
+        await this.accountService.updateAccountBalanceByAmount(
+          toAccountId,
+          toAmountDiff,
+        )
+      }
+    }
+
     return await this.transferDatabaseService.updateTransfer(
       id,
-      updateTransferDto,
+      updateTransferContent,
     )
   }
 

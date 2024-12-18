@@ -15,15 +15,13 @@ import { IsValidExchangeRate } from '../../common/decorators/is-valid-exchange-r
 class FromTransferTargetDto {
   @IsValidAmount()
   @IsNegative()
-  @IsOptional()
-  amount?: number
+  amount: number
 }
 
 class ToTransferTargetDto {
   @IsValidAmount()
   @IsPositive()
-  @IsOptional()
-  amount?: number
+  amount: number
 }
 
 export class UpdateTransferDto {
