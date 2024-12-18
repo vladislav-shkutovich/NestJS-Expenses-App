@@ -95,7 +95,7 @@ export class OperationService {
     })
   }
 
-  // TODO: - Recalculate Summary which affected by Operation date and amount on delete operation;
+  // TODO: - Recalculate Summary which affected by Operation amount on delete operation;
   async deleteOperation(id: Types.ObjectId): Promise<void> {
     return this.transactionService.executeInTransaction(async () => {
       const { accountId, amount } = await this.getOperationById(id)

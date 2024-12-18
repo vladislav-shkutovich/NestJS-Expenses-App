@@ -19,6 +19,7 @@ export class TransferService {
     private readonly accountService: AccountService,
   ) {}
 
+  // TODO: - Recalculate Summary which affected by Transfer date and amounts on create transfer;
   async createTransfer(
     createTransferDto: CreateTransferDto,
   ): Promise<Transfer> {
@@ -86,6 +87,7 @@ export class TransferService {
     return await this.transferDatabaseService.getTransfersByUser(options)
   }
 
+  // TODO: - Recalculate Summary which affected by Transfer date and amounts on update transfer;
   async updateTransfer(
     id: Types.ObjectId,
     updateTransferDto: UpdateTransferDto,
@@ -148,6 +150,7 @@ export class TransferService {
     )
   }
 
+  // TODO: - Recalculate Summary which affected by Transfer amounts on delete transfer;
   async deleteTransfer(id: Types.ObjectId): Promise<void> {
     return await this.transferDatabaseService.deleteTransfer(id)
   }
