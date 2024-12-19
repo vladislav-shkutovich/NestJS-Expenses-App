@@ -1,5 +1,5 @@
-import { AsyncLocalStorage } from 'async_hooks'
 import { ClientSession } from 'mongoose'
+import { AsyncLocalStorage } from 'node:async_hooks'
 
 const asyncLocalStorage = new AsyncLocalStorage<ClientSession>()
 
