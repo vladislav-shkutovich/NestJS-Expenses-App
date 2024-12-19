@@ -59,16 +59,12 @@ export class TransferDatabaseService {
         },
       }),
       ...((fromAccountId || fromCurrencyCode) && {
-        from: {
-          ...(fromAccountId && { accountId: fromAccountId }),
-          ...(fromCurrencyCode && { currencyCode: fromCurrencyCode }),
-        },
+        ...(fromAccountId && { 'from.accountId': fromAccountId }),
+        ...(fromCurrencyCode && { 'from.currencyCode': fromCurrencyCode }),
       }),
       ...((toAccountId || toCurrencyCode) && {
-        to: {
-          ...(toAccountId && { accountId: toAccountId }),
-          ...(toCurrencyCode && { currencyCode: toCurrencyCode }),
-        },
+        ...(toAccountId && { 'to.accountId': toAccountId }),
+        ...(toCurrencyCode && { 'to.currencyCode': toCurrencyCode }),
       }),
     }
 
