@@ -1,6 +1,8 @@
-import { Injectable } from '@nestjs/common'
+import { forwardRef, Inject, Injectable } from '@nestjs/common'
 
 import { Types } from 'mongoose'
+import { UnprocessableError } from '../common/errors/errors'
+import { OperationService } from '../operation/operation.service'
 import { UserService } from '../user/user.service'
 import { CategoryDatabaseService } from './category.database.service'
 import { UpdateCategoryOperators } from './category.types'
@@ -13,6 +15,8 @@ import type { Category } from './schemas/category.schema'
 export class CategoryService {
   constructor(
     private readonly categoryDatabaseService: CategoryDatabaseService,
+    @Inject(forwardRef(() => OperationService))
+    private readonly operationService: OperationService,
     private readonly userService: UserService,
   ) {}
 
@@ -66,7 +70,16 @@ export class CategoryService {
   }
 
   async deleteCategory(id: Types.ObjectId): Promise<void> {
-    // TODO: - Provide a rejection on deleting a category if it is used in at least one operation; *after Operation module implementation
+    const isCategoryUsedInOperations =
+      await this.operationService.isOperationExistByQuery({
+        categoryId: id,
+      })
+
+    if (isCategoryUsedInOperations) {
+      throw new UnprocessableError(
+        'You cannot delete a category that is already in use in operations. You can archive this category instead.',
+      )
+    }
 
     return await this.categoryDatabaseService.deleteCategory(id)
   }

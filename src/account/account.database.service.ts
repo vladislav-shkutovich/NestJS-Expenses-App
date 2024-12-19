@@ -3,12 +3,13 @@ import { InjectModel } from '@nestjs/mongoose'
 import { Model, Types } from 'mongoose'
 
 import { ACCOUNT_MODEL } from '../common/constants/database.constants'
+import { NotFoundError } from '../common/errors/errors'
+import { removeUndefined } from '../common/utils/formatting.utils'
+import { getSession } from '../transaction/transaction.context'
 import { AccountQueryParamsDto } from './dto/account-query-params.dto'
 import { CreateAccountDto } from './dto/create-account.dto'
 import { UpdateAccountDto } from './dto/update-account.dto'
 import type { Account } from './schemas/account.schema'
-import { NotFoundError } from '../common/errors/errors'
-import { removeUndefined } from '../common/utils/formatting.utils'
 
 @Injectable()
 export class AccountDatabaseService {
@@ -59,5 +60,24 @@ export class AccountDatabaseService {
     if (deletedCount === 0) {
       throw new NotFoundError(`Account with id ${id} not found`)
     }
+  }
+
+  async updateAccountBalanceByAmount(
+    id: Types.ObjectId,
+    amount: number,
+  ): Promise<Account> {
+    const session = getSession()
+
+    const updatedAccount = await this.accountModel.findByIdAndUpdate(
+      id,
+      { $inc: { balance: amount } },
+      { new: true, session },
+    )
+
+    if (!updatedAccount) {
+      throw new NotFoundError(`Account with id ${id} not found`)
+    }
+
+    return updatedAccount
   }
 }

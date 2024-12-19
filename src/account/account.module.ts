@@ -15,5 +15,6 @@ import { AccountSchema } from './schemas/account.schema'
   ],
   controllers: [AccountController],
   providers: [AccountService, AccountDatabaseService],
+  exports: [AccountService],
 })
 export class AccountModule {}

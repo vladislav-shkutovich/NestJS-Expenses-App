@@ -67,4 +67,14 @@ export class AccountService {
 
     return await this.accountDatabaseService.deleteAccount(id)
   }
+
+  async updateAccountBalanceByAmount(
+    id: Types.ObjectId,
+    amount: number,
+  ): Promise<Account> {
+    return await this.accountDatabaseService.updateAccountBalanceByAmount(
+      id,
+      amount,
+    )
+  }
 }

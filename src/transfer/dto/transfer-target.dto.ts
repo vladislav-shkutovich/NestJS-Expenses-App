@@ -1,4 +1,4 @@
-import { IsISO4217CurrencyCode, IsNumber } from 'class-validator'
+import { IsISO4217CurrencyCode, IsNumber, NotEquals } from 'class-validator'
 import { Types } from 'mongoose'
 
 import { IsValidObjectId } from '../../common/decorators/is-valid-objectid.decorator'
@@ -13,5 +13,6 @@ export class TransferTargetDto {
   currencyCode: string
 
   @IsNumber()
+  @NotEquals(0)
   amount: number
 }
