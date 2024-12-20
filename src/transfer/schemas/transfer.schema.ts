@@ -7,7 +7,7 @@ import {
 } from '../../common/constants/database.constants'
 
 @Schema({ _id: false })
-class TransferTarget {
+export class TransferTarget {
   @Prop({ type: Types.ObjectId, ref: ACCOUNT_MODEL, required: true })
   accountId: Types.ObjectId
 

@@ -1,8 +1,8 @@
 import { Type } from 'class-transformer'
 import {
   IsDate,
+  IsNegative,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsPositive,
   IsString,
@@ -10,9 +10,30 @@ import {
 } from 'class-validator'
 import { Types } from 'mongoose'
 
+import { IsValidAmount } from '../../common/decorators/is-valid-amount.decorator'
+import { IsValidExchangeRate } from '../../common/decorators/is-valid-exchange-rate.decorator'
 import { IsValidObjectId } from '../../common/decorators/is-valid-objectid.decorator'
 import { TransformStringToObjectId } from '../../common/decorators/transform-string-to-objectid.decorator'
-import { TransferTargetDto } from './transfer-target.dto'
+
+class FromTransferTargetDto {
+  @TransformStringToObjectId()
+  @IsValidObjectId()
+  accountId: Types.ObjectId
+
+  @IsValidAmount()
+  @IsNegative()
+  amount: number
+}
+
+class ToTransferTargetDto {
+  @TransformStringToObjectId()
+  @IsValidObjectId()
+  accountId: Types.ObjectId
+
+  @IsValidAmount()
+  @IsPositive()
+  amount: number
+}
 
 export class CreateTransferDto {
   @TransformStringToObjectId()
@@ -20,15 +41,14 @@ export class CreateTransferDto {
   userId: Types.ObjectId
 
   @ValidateNested()
-  @Type(() => TransferTargetDto)
-  from: TransferTargetDto
+  @Type(() => FromTransferTargetDto)
+  from: FromTransferTargetDto
 
   @ValidateNested()
-  @Type(() => TransferTargetDto)
-  to: TransferTargetDto
+  @Type(() => ToTransferTargetDto)
+  to: ToTransferTargetDto
 
-  @IsNumber()
-  @IsPositive()
+  @IsValidExchangeRate()
   exchangeRate: number
 
   @IsDate()
