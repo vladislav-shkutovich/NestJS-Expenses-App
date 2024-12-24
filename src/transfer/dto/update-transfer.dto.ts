@@ -10,7 +10,7 @@ import {
 } from 'class-validator'
 
 import { IsValidAmount } from '../../common/decorators/is-valid-amount.decorator'
-import { IsValidExchangeRate } from '../../common/decorators/is-valid-exchange-rate.decorator'
+import { IsValidExchangeRate } from '../decorators/is-valid-exchange-rate.decorator'
 
 class FromTransferTargetDto {
   @IsValidAmount()

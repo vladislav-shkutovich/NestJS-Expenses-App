@@ -11,9 +11,9 @@ import {
 import { Types } from 'mongoose'
 
 import { IsValidAmount } from '../../common/decorators/is-valid-amount.decorator'
-import { IsValidExchangeRate } from '../../common/decorators/is-valid-exchange-rate.decorator'
 import { IsValidObjectId } from '../../common/decorators/is-valid-objectid.decorator'
 import { TransformStringToObjectId } from '../../common/decorators/transform-string-to-objectid.decorator'
+import { IsValidExchangeRate } from '../decorators/is-valid-exchange-rate.decorator'
 
 class FromTransferTargetDto {
   @TransformStringToObjectId()

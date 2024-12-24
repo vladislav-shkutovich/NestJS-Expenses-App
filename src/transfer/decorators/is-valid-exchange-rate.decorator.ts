@@ -5,7 +5,7 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator'
-import { EXCHANGE_RATE_DECIMAL_PLACES } from '../constants/formatting.constants'
+import { EXCHANGE_RATE_DECIMAL_PLACES } from '../../common/constants/formatting.constants'
 
 export function IsValidExchangeRate(validationOptions?: ValidationOptions) {
   return function (object: object, propertyName: string) {
