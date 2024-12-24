@@ -34,22 +34,27 @@ export class TransferService {
 
       this.validateTransferConsistence(fromAmount, toAmount, exchangeRate)
 
-      const {
-        currencyCode: fromCurrencyCode,
-        userId: fromAccountUserId,
-        name: fromAccountName,
-      } = await this.accountService.updateAccountBalanceByAmount(
-        fromAccountId,
-        fromAmount,
-      )
-      const {
-        currencyCode: toCurrencyCode,
-        userId: toAccountUserId,
-        name: toAccountName,
-      } = await this.accountService.updateAccountBalanceByAmount(
-        toAccountId,
-        toAmount,
-      )
+      const [
+        {
+          currencyCode: fromCurrencyCode,
+          userId: fromAccountUserId,
+          name: fromAccountName,
+        },
+        {
+          currencyCode: toCurrencyCode,
+          userId: toAccountUserId,
+          name: toAccountName,
+        },
+      ] = await Promise.all([
+        await this.accountService.updateAccountBalanceByAmount(
+          fromAccountId,
+          fromAmount,
+        ),
+        await this.accountService.updateAccountBalanceByAmount(
+          toAccountId,
+          toAmount,
+        ),
+      ])
 
       if (
         !userId.equals(fromAccountUserId) ||
@@ -164,14 +169,16 @@ export class TransferService {
       } = await this.getTransferById(id)
 
       // "-" sign before the amounts is required, since it is necessary to reduce the accounts balances by its value
-      await this.accountService.updateAccountBalanceByAmount(
-        toAccountId,
-        -toAmount,
-      )
-      await this.accountService.updateAccountBalanceByAmount(
-        fromAccountId,
-        -fromAmount,
-      )
+      await Promise.all([
+        await this.accountService.updateAccountBalanceByAmount(
+          toAccountId,
+          -toAmount,
+        ),
+        await this.accountService.updateAccountBalanceByAmount(
+          fromAccountId,
+          -fromAmount,
+        ),
+      ])
 
       return await this.transferDatabaseService.deleteTransfer(id)
     })
