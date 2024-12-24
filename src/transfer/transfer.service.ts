@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { Types } from 'mongoose'
 
 import { AccountService } from '../account/account.service'
-import { ValidationError } from '../common/errors/errors'
+import { UnprocessableError, ValidationError } from '../common/errors/errors'
 import { TransactionService } from '../transaction/transaction.service'
 import { CreateTransferDto } from './dto/create-transfer.dto'
 import { TransferQueryParamsDto } from './dto/transfer-query-params.dto'
@@ -187,7 +187,7 @@ export class TransferService {
     const isTransferConsistent = calculatedToAmount === toAmount
 
     if (!isTransferConsistent) {
-      throw new ValidationError(
+      throw new UnprocessableError(
         'Transfer amounts are inconsistent with provided exchange rate',
       )
     }
