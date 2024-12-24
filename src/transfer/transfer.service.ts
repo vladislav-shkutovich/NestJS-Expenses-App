@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common'
-import Decimal from 'decimal.js-light'
 import { Types } from 'mongoose'
 
 import { AccountService } from '../account/account.service'
-import { AMOUNT_DECIMAL_PLACES } from '../common/constants/formatting.constants'
 import { ValidationError } from '../common/errors/errors'
 import { TransactionService } from '../transaction/transaction.service'
 import { CreateTransferDto } from './dto/create-transfer.dto'
@@ -184,16 +182,9 @@ export class TransferService {
     toAmount: number,
     exchangeRate: number,
   ): void {
-    const fromAmountDecimal = new Decimal(fromAmount)
-    const toAmountDecimal = new Decimal(toAmount)
-    const exchangeRateDecimal = new Decimal(exchangeRate)
+    const calculatedToAmount = Math.round(-(fromAmount / exchangeRate))
 
-    const calculatedToAmount = fromAmountDecimal
-      .dividedBy(exchangeRateDecimal)
-      .negated()
-      .toDecimalPlaces(AMOUNT_DECIMAL_PLACES)
-
-    const isTransferConsistent = calculatedToAmount.equals(toAmountDecimal)
+    const isTransferConsistent = calculatedToAmount === toAmount
 
     if (!isTransferConsistent) {
       throw new ValidationError(
