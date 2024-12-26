@@ -1,8 +1,8 @@
 import { Type } from 'class-transformer'
 import {
   IsDate,
+  IsInt,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsString,
   NotEquals,
@@ -25,7 +25,7 @@ export class CreateOperationDto {
   @IsValidObjectId()
   categoryId: Types.ObjectId
 
-  @IsNumber()
+  @IsInt()
   @NotEquals(0)
   amount: number
 

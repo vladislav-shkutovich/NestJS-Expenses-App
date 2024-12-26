@@ -1,9 +1,9 @@
 import {
   IsBoolean,
   IsEnum,
+  IsInt,
   IsISO4217CurrencyCode,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator'
@@ -32,7 +32,7 @@ export class CreateAccountDto {
   @IsOptional()
   isSavings?: boolean
 
-  @IsNumber()
+  @IsInt()
   @IsOptional()
   balance?: number
 }

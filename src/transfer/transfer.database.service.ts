@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { Model, Types } from 'mongoose'
+import { FilterQuery, Model, Types } from 'mongoose'
 
 import { TRANSFER_MODEL } from '../common/constants/database.constants'
-import { CreateTransferDto } from './dto/create-transfer.dto'
+import { NotFoundError } from '../common/errors/errors'
+import { removeUndefined } from '../common/utils/formatting.utils'
+import { getSession } from '../transaction/transaction.context'
 import { TransferQueryParamsDto } from './dto/transfer-query-params.dto'
-import { UpdateTransferDto } from './dto/update-transfer.dto'
 import type { Transfer } from './schemas/transfer.schema'
+import { CreateTransferContent, UpdateTransferContent } from './transfer.types'
 
 @Injectable()
 export class TransferDatabaseService {
@@ -15,34 +17,90 @@ export class TransferDatabaseService {
   ) {}
 
   async createTransfer(
-    createTransferDto: CreateTransferDto,
+    createTransferContent: CreateTransferContent,
   ): Promise<Transfer> {
-    console.error('mock createTransferDto', createTransferDto)
-    return {} as Transfer
+    const session = getSession()
+
+    const transferDoc = new this.transferModel(createTransferContent)
+    const createdTransfer = await transferDoc.save({ session })
+
+    return createdTransfer.toObject()
   }
 
   async getTransferById(id: Types.ObjectId): Promise<Transfer> {
-    console.error('mock id', id)
-    return {} as Transfer
+    const transferById = await this.transferModel.findById(id).lean()
+
+    if (!transferById) {
+      throw new NotFoundError(`Transfer with id ${id} not found`)
+    }
+
+    return transferById
   }
 
   async getTransfersByUser(
     options: TransferQueryParamsDto,
   ): Promise<Transfer[]> {
-    console.error('mock options', options)
-    return [] as Transfer[]
+    const {
+      dateFrom,
+      dateTo,
+      fromAccountId,
+      toAccountId,
+      fromCurrencyCode,
+      toCurrencyCode,
+      ...restOptions
+    } = removeUndefined(options)
+
+    const query: FilterQuery<Transfer> = {
+      ...restOptions,
+      ...((dateFrom || dateTo) && {
+        date: {
+          ...(dateFrom && { $gte: dateFrom }),
+          ...(dateTo && { $lte: dateTo }),
+        },
+      }),
+      ...((fromAccountId || fromCurrencyCode) && {
+        ...(fromAccountId && { 'from.accountId': fromAccountId }),
+        ...(fromCurrencyCode && { 'from.currencyCode': fromCurrencyCode }),
+      }),
+      ...((toAccountId || toCurrencyCode) && {
+        ...(toAccountId && { 'to.accountId': toAccountId }),
+        ...(toCurrencyCode && { 'to.currencyCode': toCurrencyCode }),
+      }),
+    }
+
+    return await this.transferModel.find(query).lean()
   }
 
   async updateTransfer(
     id: Types.ObjectId,
-    updateTransferDto: UpdateTransferDto,
+    updateTransferDto: UpdateTransferContent,
   ): Promise<Transfer> {
-    console.error('mock id', id)
-    console.error('mock updateTransferDto', updateTransferDto)
-    return {} as Transfer
+    const session = getSession()
+
+    const updatedTransfer = await this.transferModel
+      .findByIdAndUpdate(id, updateTransferDto, {
+        new: true,
+        session,
+      })
+      .lean()
+
+    if (!updatedTransfer) {
+      throw new NotFoundError(`Transfer with id ${id} not found`)
+    }
+
+    return updatedTransfer
   }
 
   async deleteTransfer(id: Types.ObjectId): Promise<void> {
-    console.error('mock id', id)
+    const session = getSession()
+
+    const { deletedCount } = await this.transferModel.deleteOne(
+      { _id: id },
+      { session },
+    )
+
+    if (deletedCount === 0) {
+      throw new NotFoundError(`Transfer with id ${id} not found`)
+    }
   }
 }
