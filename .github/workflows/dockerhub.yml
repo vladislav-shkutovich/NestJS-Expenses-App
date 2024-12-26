@@ -36,7 +36,7 @@ jobs:
           if [[ -z "$TAG" || "$TAG" == "latest" ]]; then
             TAG=$(git rev-parse --short=7 HEAD)
           fi
-          echo "::set-output name=tag::$TAG"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
 
       - name: Build Docker Image
         run: |
