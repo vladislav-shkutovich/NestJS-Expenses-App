@@ -5,6 +5,11 @@ on:
     branches:
       - test
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Docker image tag'
+        required: false
+        default: 'latest'
 
 jobs:
   build-and-push:
@@ -24,11 +29,22 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
+      - name: Set Tag
+        id: set_tag
+        run: |
+          TAG="${{ github.event.inputs.tag }}"
+          if [[ -z "$TAG" || "$TAG" == "latest" ]]; then
+            TAG=$(git rev-parse --short=7 HEAD)
+          fi
+          echo "::set-output name=tag::$TAG"
+
       - name: Build Docker Image
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }}:${{ github.sha }} .
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }}:${{ steps.set_tag.outputs.tag }} .
 
       - name: Push Docker Image
         run: |
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }}:${{ github.sha }}
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }}:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }}:${{ steps.set_tag.outputs.tag }}
+          if [[ "${{ steps.set_tag.outputs.tag }}" != "latest" ]]; then
+            docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }}:latest
+          fi
