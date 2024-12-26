@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer'
 import {
   IsDate,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -8,7 +9,6 @@ import {
 } from 'class-validator'
 import { Types } from 'mongoose'
 
-import { IsValidAmount } from '../../common/decorators/is-valid-amount.decorator'
 import { IsValidObjectId } from '../../common/decorators/is-valid-objectid.decorator'
 import { TransformStringToObjectId } from '../../common/decorators/transform-string-to-objectid.decorator'
 
@@ -18,7 +18,7 @@ export class UpdateOperationDto {
   @IsOptional()
   categoryId?: Types.ObjectId
 
-  @IsValidAmount()
+  @IsInt()
   @NotEquals(0)
   @IsOptional()
   amount?: number

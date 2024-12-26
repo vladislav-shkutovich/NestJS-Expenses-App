@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer'
 import {
   IsDate,
+  IsInt,
   IsNegative,
   IsNotEmpty,
   IsOptional,
@@ -9,17 +10,16 @@ import {
   ValidateNested,
 } from 'class-validator'
 
-import { IsValidAmount } from '../../common/decorators/is-valid-amount.decorator'
 import { IsValidExchangeRate } from '../decorators/is-valid-exchange-rate.decorator'
 
 class FromTransferTargetDto {
-  @IsValidAmount()
+  @IsInt()
   @IsNegative()
   amount: number
 }
 
 class ToTransferTargetDto {
-  @IsValidAmount()
+  @IsInt()
   @IsPositive()
   amount: number
 }
