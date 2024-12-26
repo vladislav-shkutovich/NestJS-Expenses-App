@@ -25,7 +25,7 @@ export class OperationService {
   async createOperation(
     createOperationDto: CreateOperationDto,
   ): Promise<Operation> {
-    return this.transactionService.executeInTransaction(async () => {
+    return await this.transactionService.executeInTransaction(async () => {
       const { accountId, userId, categoryId, amount } = createOperationDto
 
       const { currencyCode, userId: accountUserId } =
@@ -64,7 +64,7 @@ export class OperationService {
     id: Types.ObjectId,
     updateOperationDto: UpdateOperationDto,
   ): Promise<Operation> {
-    return this.transactionService.executeInTransaction(async () => {
+    return await this.transactionService.executeInTransaction(async () => {
       const { categoryId, amount } = updateOperationDto
 
       if (categoryId || amount) {
@@ -97,7 +97,7 @@ export class OperationService {
 
   // TODO: - Recalculate Summary which affected by Operation amount on delete operation;
   async deleteOperation(id: Types.ObjectId): Promise<void> {
-    return this.transactionService.executeInTransaction(async () => {
+    return await this.transactionService.executeInTransaction(async () => {
       const { accountId, amount } = await this.getOperationById(id)
 
       // "-" sign before amount is required, since it's necessary to reduce the account balance by its value

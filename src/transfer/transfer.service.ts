@@ -23,7 +23,7 @@ export class TransferService {
   async createTransfer(
     createTransferDto: CreateTransferDto,
   ): Promise<Transfer> {
-    return this.transactionService.executeInTransaction(async () => {
+    return await this.transactionService.executeInTransaction(async () => {
       const {
         userId,
         from: { accountId: fromAccountId, amount: fromAmount },
@@ -100,7 +100,7 @@ export class TransferService {
     id: Types.ObjectId,
     updateTransferDto: UpdateTransferDto,
   ): Promise<Transfer> {
-    return this.transactionService.executeInTransaction(async () => {
+    return await this.transactionService.executeInTransaction(async () => {
       const { from, to, ...restUpdateTransferParams } = updateTransferDto
       const updateTransferContent: UpdateTransferContent =
         restUpdateTransferParams
@@ -162,7 +162,7 @@ export class TransferService {
 
   // TODO: - Recalculate Summary which affected by Transfer amounts on delete transfer;
   async deleteTransfer(id: Types.ObjectId): Promise<void> {
-    return this.transactionService.executeInTransaction(async () => {
+    return await this.transactionService.executeInTransaction(async () => {
       const {
         from: { accountId: fromAccountId, amount: fromAmount },
         to: { accountId: toAccountId, amount: toAmount },
