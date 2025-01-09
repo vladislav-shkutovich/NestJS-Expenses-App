@@ -8,10 +8,14 @@ import {
   Patch,
   Post,
   Query,
+  Request,
+  UseGuards,
 } from '@nestjs/common'
+import type { Request as ExpressRequest } from 'express'
 
 import { ACCOUNTS_ROUTE } from '../common/constants/routing.constants'
 import { IdParamDto } from '../common/dto/id-param.dto'
+import { UserOwnershipGuard } from '../common/guards/user-ownership.guard'
 import { AccountService } from './account.service'
 import { AccountQueryParamsDto } from './dto/account-query-params.dto'
 import { CreateAccountDto } from './dto/create-account.dto'
@@ -19,6 +23,7 @@ import { UpdateAccountDto } from './dto/update-account.dto'
 import type { Account } from './schemas/account.schema'
 
 @Controller(ACCOUNTS_ROUTE)
+@UseGuards(UserOwnershipGuard)
 export class AccountController {
   constructor(private readonly accountService: AccountService) {}
 
@@ -30,28 +35,37 @@ export class AccountController {
   }
 
   @Get(':id')
-  async getAccountById(@Param() params: IdParamDto): Promise<Account> {
-    return await this.accountService.getAccountById(params.id)
+  async getAccount(
+    @Param() params: IdParamDto,
+    @Request() req: ExpressRequest,
+  ): Promise<Account> {
+    return await this.accountService.getAccount(params.id, req.user._id)
   }
 
   @Get()
-  async getAccountsByUser(
-    @Query() query: AccountQueryParamsDto,
-  ): Promise<Account[]> {
-    return await this.accountService.getAccountsByUser(query)
+  async getAccounts(@Query() query: AccountQueryParamsDto): Promise<Account[]> {
+    return await this.accountService.getAccounts(query)
   }
 
   @Patch(':id')
   async updateAccount(
     @Param() params: IdParamDto,
+    @Request() req: ExpressRequest,
     @Body() updateAccountDto: UpdateAccountDto,
   ): Promise<Account> {
-    return await this.accountService.updateAccount(params.id, updateAccountDto)
+    return await this.accountService.updateAccount(
+      params.id,
+      req.user._id,
+      updateAccountDto,
+    )
   }
 
   @Delete(':id')
   @HttpCode(204)
-  async deleteAccount(@Param() params: IdParamDto): Promise<void> {
-    return await this.accountService.deleteAccount(params.id)
+  async deleteAccount(
+    @Param() params: IdParamDto,
+    @Request() req: ExpressRequest,
+  ): Promise<void> {
+    return await this.accountService.deleteAccount(params.id, req.user._id)
   }
 }

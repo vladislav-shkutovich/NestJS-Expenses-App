@@ -22,29 +22,45 @@ export class AccountDatabaseService {
     return createdAccount.toObject()
   }
 
-  async getAccountById(id: Types.ObjectId): Promise<Account> {
-    const accountById = await this.accountModel.findById(id).lean()
+  async getAccount(
+    id: Types.ObjectId,
+    userId: Types.ObjectId,
+  ): Promise<Account> {
+    const account = await this.accountModel
+      .findOne({
+        _id: id,
+        userId,
+      })
+      .lean()
 
-    if (!accountById) {
+    if (!account) {
       throw new NotFoundError(`Account with id ${id} not found`)
     }
 
-    return accountById
+    return account
   }
 
-  async getAccountsByUser(options: AccountQueryParamsDto): Promise<Account[]> {
+  async getAccounts(options: AccountQueryParamsDto): Promise<Account[]> {
     const filteredOptions = removeUndefined(options)
     return await this.accountModel.find(filteredOptions).lean()
   }
 
   async updateAccount(
     id: Types.ObjectId,
+    userId: Types.ObjectId,
     updateAccountDto: UpdateAccountDto,
   ): Promise<Account> {
     const updatedAccount = await this.accountModel
-      .findByIdAndUpdate(id, updateAccountDto, {
-        new: true,
-      })
+      .findOneAndUpdate(
+        {
+          _id: id,
+          userId,
+        },
+        updateAccountDto,
+        {
+          new: true,
+        },
+      )
       .lean()
 
     if (!updatedAccount) {
@@ -54,8 +70,14 @@ export class AccountDatabaseService {
     return updatedAccount
   }
 
-  async deleteAccount(id: Types.ObjectId): Promise<void> {
-    const { deletedCount } = await this.accountModel.deleteOne({ _id: id })
+  async deleteAccount(
+    id: Types.ObjectId,
+    userId: Types.ObjectId,
+  ): Promise<void> {
+    const { deletedCount } = await this.accountModel.deleteOne({
+      _id: id,
+      userId,
+    })
 
     if (deletedCount === 0) {
       throw new NotFoundError(`Account with id ${id} not found`)
