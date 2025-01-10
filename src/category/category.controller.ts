@@ -8,10 +8,14 @@ import {
   Patch,
   Post,
   Query,
+  Request,
+  UseGuards,
 } from '@nestjs/common'
+import type { Request as ExpressRequest } from 'express'
 
 import { CATEGORIES_ROUTE } from '../common/constants/routing.constants'
 import { IdParamDto } from '../common/dto/id-param.dto'
+import { UserOwnershipGuard } from '../common/guards/user-ownership.guard'
 import { CategoryService } from './category.service'
 import { CategoryQueryParamsDto } from './dto/category-query-params.dto'
 import { CreateCategoryDto } from './dto/create-category.dto'
@@ -19,6 +23,7 @@ import { UpdateCategoryDto } from './dto/update-category.dto'
 import type { Category } from './schemas/category.schema'
 
 @Controller(CATEGORIES_ROUTE)
+@UseGuards(UserOwnershipGuard)
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
@@ -30,31 +35,39 @@ export class CategoryController {
   }
 
   @Get(':id')
-  async getCategoryById(@Param() params: IdParamDto): Promise<Category> {
-    return await this.categoryService.getCategoryById(params.id)
+  async getCategory(
+    @Param() params: IdParamDto,
+    @Request() req: ExpressRequest,
+  ): Promise<Category> {
+    return await this.categoryService.getCategory(params.id, req.user._id)
   }
 
   @Get()
-  async getCategoriesByUser(
+  async getCategories(
     @Query() query: CategoryQueryParamsDto,
   ): Promise<Category[]> {
-    return await this.categoryService.getCategoriesByUser(query)
+    return await this.categoryService.getCategories(query)
   }
 
   @Patch(':id')
   async updateCategory(
     @Param() params: IdParamDto,
+    @Request() req: ExpressRequest,
     @Body() updateCategoryDto: UpdateCategoryDto,
   ): Promise<Category> {
     return await this.categoryService.updateCategory(
       params.id,
+      req.user._id,
       updateCategoryDto,
     )
   }
 
   @Delete(':id')
   @HttpCode(204)
-  async deleteCategory(@Param() params: IdParamDto): Promise<void> {
-    return await this.categoryService.deleteCategory(params.id)
+  async deleteCategory(
+    @Param() params: IdParamDto,
+    @Request() req: ExpressRequest,
+  ): Promise<void> {
+    return await this.categoryService.deleteCategory(params.id, req.user._id)
   }
 }

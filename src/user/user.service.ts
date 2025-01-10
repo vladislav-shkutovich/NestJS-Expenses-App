@@ -98,14 +98,4 @@ export class UserService {
   async deleteUser(id: Types.ObjectId): Promise<void> {
     return await this.userDatabaseService.deleteUser(id)
   }
-
-  async ensureUserExists(userId: Types.ObjectId): Promise<void> {
-    const isUserExist = await this.userDatabaseService.isUserExistByQuery({
-      _id: userId,
-    })
-
-    if (!isUserExist) {
-      throw new NotFoundError(`User with userId ${userId} not found`)
-    }
-  }
 }

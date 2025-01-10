@@ -111,8 +111,10 @@ export class OperationService {
     operationCategoryId: Types.ObjectId,
     operationUserId: Types.ObjectId,
   ): Promise<void> {
-    const { isArchived, userId } =
-      await this.categoryService.getCategoryById(operationCategoryId)
+    const { isArchived, userId } = await this.categoryService.getCategory(
+      operationCategoryId,
+      operationUserId,
+    )
 
     const operationCategoryErrors: string[] = []
 
@@ -122,6 +124,7 @@ export class OperationService {
       )
     }
 
+    // ? TODO: - Review all consistency checks for user related documents in all modules and remove unnecessary after refactoring;
     if (!operationUserId.equals(userId)) {
       operationCategoryErrors.push(
         'Specified in operation userId must match a userId in specified category',
