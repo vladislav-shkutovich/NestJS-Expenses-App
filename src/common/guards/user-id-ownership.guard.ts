@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common'
 
 @Injectable()
-export class UserOwnershipGuard implements CanActivate {
+export class UserIdOwnershipGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const { body, query, user } = context.switchToHttp().getRequest()
 

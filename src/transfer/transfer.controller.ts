@@ -15,7 +15,7 @@ import type { Request as ExpressRequest } from 'express'
 
 import { TRANSFERS_ROUTE } from '../common/constants/routing.constants'
 import { IdParamDto } from '../common/dto/id-param.dto'
-import { UserOwnershipGuard } from '../common/guards/user-ownership.guard'
+import { UserIdOwnershipGuard } from '../common/guards/user-id-ownership.guard'
 import { CreateTransferDto } from './dto/create-transfer.dto'
 import { TransferQueryParamsDto } from './dto/transfer-query-params.dto'
 import { UpdateTransferDto } from './dto/update-transfer.dto'
@@ -23,7 +23,7 @@ import type { Transfer } from './schemas/transfer.schema'
 import { TransferService } from './transfer.service'
 
 @Controller(TRANSFERS_ROUTE)
-@UseGuards(UserOwnershipGuard)
+@UseGuards(UserIdOwnershipGuard)
 export class TransferController {
   constructor(private readonly transferService: TransferService) {}
 

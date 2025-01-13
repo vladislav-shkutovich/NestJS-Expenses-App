@@ -15,7 +15,7 @@ import type { Request as ExpressRequest } from 'express'
 
 import { ACCOUNTS_ROUTE } from '../common/constants/routing.constants'
 import { IdParamDto } from '../common/dto/id-param.dto'
-import { UserOwnershipGuard } from '../common/guards/user-ownership.guard'
+import { UserIdOwnershipGuard } from '../common/guards/user-id-ownership.guard'
 import { AccountService } from './account.service'
 import { AccountQueryParamsDto } from './dto/account-query-params.dto'
 import { CreateAccountDto } from './dto/create-account.dto'
@@ -23,7 +23,7 @@ import { UpdateAccountDto } from './dto/update-account.dto'
 import type { Account } from './schemas/account.schema'
 
 @Controller(ACCOUNTS_ROUTE)
-@UseGuards(UserOwnershipGuard)
+@UseGuards(UserIdOwnershipGuard)
 export class AccountController {
   constructor(private readonly accountService: AccountService) {}
 

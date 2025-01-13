@@ -15,7 +15,7 @@ import type { Request as ExpressRequest } from 'express'
 
 import { CATEGORIES_ROUTE } from '../common/constants/routing.constants'
 import { IdParamDto } from '../common/dto/id-param.dto'
-import { UserOwnershipGuard } from '../common/guards/user-ownership.guard'
+import { UserIdOwnershipGuard } from '../common/guards/user-id-ownership.guard'
 import { CategoryService } from './category.service'
 import { CategoryQueryParamsDto } from './dto/category-query-params.dto'
 import { CreateCategoryDto } from './dto/create-category.dto'
@@ -23,7 +23,7 @@ import { UpdateCategoryDto } from './dto/update-category.dto'
 import type { Category } from './schemas/category.schema'
 
 @Controller(CATEGORIES_ROUTE)
-@UseGuards(UserOwnershipGuard)
+@UseGuards(UserIdOwnershipGuard)
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 

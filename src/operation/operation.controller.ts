@@ -15,7 +15,7 @@ import type { Request as ExpressRequest } from 'express'
 
 import { OPERATIONS_ROUTE } from '../common/constants/routing.constants'
 import { IdParamDto } from '../common/dto/id-param.dto'
-import { UserOwnershipGuard } from '../common/guards/user-ownership.guard'
+import { UserIdOwnershipGuard } from '../common/guards/user-id-ownership.guard'
 import { CreateOperationDto } from './dto/create-operation.dto'
 import { OperationQueryParamsDto } from './dto/operation-query-params.dto'
 import { UpdateOperationDto } from './dto/update-operation.dto'
@@ -23,7 +23,7 @@ import { OperationService } from './operation.service'
 import type { Operation } from './schemas/operation.schema'
 
 @Controller(OPERATIONS_ROUTE)
-@UseGuards(UserOwnershipGuard)
+@UseGuards(UserIdOwnershipGuard)
 export class OperationController {
   constructor(private readonly operationService: OperationService) {}
 
