@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common'
 
 import { USERS_ROUTE } from '../common/constants/routing.constants'
@@ -14,10 +15,12 @@ import { Public } from '../common/decorators/public.decorator'
 import { IdParamDto } from '../common/dto/id-param.dto'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
+import { UserOwnershipGuard } from './guards/user-ownership.guard'
 import { UserService } from './user.service'
 import type { UserWithoutPassword } from './user.types'
 
 @Controller(USERS_ROUTE)
+@UseGuards(UserOwnershipGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
