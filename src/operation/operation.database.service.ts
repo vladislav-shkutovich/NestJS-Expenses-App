@@ -28,19 +28,25 @@ export class OperationDatabaseService {
     return createdOperation.toObject()
   }
 
-  async getOperationById(id: Types.ObjectId): Promise<Operation> {
-    const operationById = await this.operationModel.findById(id).lean()
+  async getOperation(
+    id: Types.ObjectId,
+    userId: Types.ObjectId,
+  ): Promise<Operation> {
+    const operation = await this.operationModel
+      .findOne({
+        _id: id,
+        userId,
+      })
+      .lean()
 
-    if (!operationById) {
+    if (!operation) {
       throw new NotFoundError(`Operation with id ${id} not found`)
     }
 
-    return operationById
+    return operation
   }
 
-  async getOperationsByUser(
-    options: OperationQueryParamsDto,
-  ): Promise<Operation[]> {
+  async getOperations(options: OperationQueryParamsDto): Promise<Operation[]> {
     const { dateFrom, dateTo, type, ...restOptions } = removeUndefined(options)
 
     const query: FilterQuery<Operation> = {
@@ -64,15 +70,23 @@ export class OperationDatabaseService {
 
   async updateOperation(
     id: Types.ObjectId,
+    userId: Types.ObjectId,
     updateOperationDto: UpdateOperationDto,
   ): Promise<Operation> {
     const session = getSession()
 
     const updatedOperation = await this.operationModel
-      .findByIdAndUpdate(id, updateOperationDto, {
-        new: true,
-        session,
-      })
+      .findOneAndUpdate(
+        {
+          _id: id,
+          userId,
+        },
+        updateOperationDto,
+        {
+          new: true,
+          session,
+        },
+      )
       .lean()
 
     if (!updatedOperation) {
@@ -82,11 +96,14 @@ export class OperationDatabaseService {
     return updatedOperation
   }
 
-  async deleteOperation(id: Types.ObjectId): Promise<void> {
+  async deleteOperation(
+    id: Types.ObjectId,
+    userId: Types.ObjectId,
+  ): Promise<void> {
     const session = getSession()
 
     const { deletedCount } = await this.operationModel.deleteOne(
-      { _id: id },
+      { _id: id, userId },
       { session },
     )
 

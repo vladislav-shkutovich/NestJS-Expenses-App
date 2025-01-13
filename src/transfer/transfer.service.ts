@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { Types } from 'mongoose'
 
 import { AccountService } from '../account/account.service'
-import { UnprocessableError, ValidationError } from '../common/errors/errors'
+import { UnprocessableError } from '../common/errors/errors'
 import { TransactionService } from '../transaction/transaction.service'
 import { CreateTransferDto } from './dto/create-transfer.dto'
 import { TransferQueryParamsDto } from './dto/transfer-query-params.dto'
@@ -35,35 +35,20 @@ export class TransferService {
       this.validateTransferConsistence(fromAmount, toAmount, exchangeRate)
 
       const [
-        {
-          currencyCode: fromCurrencyCode,
-          userId: fromAccountUserId,
-          name: fromAccountName,
-        },
-        {
-          currencyCode: toCurrencyCode,
-          userId: toAccountUserId,
-          name: toAccountName,
-        },
+        { currencyCode: fromCurrencyCode, name: fromAccountName },
+        { currencyCode: toCurrencyCode, name: toAccountName },
       ] = await Promise.all([
         await this.accountService.updateAccountBalanceByAmount(
           fromAccountId,
+          userId,
           fromAmount,
         ),
         await this.accountService.updateAccountBalanceByAmount(
           toAccountId,
+          userId,
           toAmount,
         ),
       ])
-
-      if (
-        !userId.equals(fromAccountUserId) ||
-        !userId.equals(toAccountUserId)
-      ) {
-        throw new ValidationError(
-          'Specified in transfer userId must match a userId in both specified accounts',
-        )
-      }
 
       const createTransferContent: CreateTransferContent = {
         ...createTransferDto,
@@ -111,6 +96,8 @@ export class TransferService {
         const toAmount = to?.amount
 
         const {
+          // TODO: take userId from updateTransfer params
+          userId,
           exchangeRate: prevExchangeRate,
           from: prevFrom,
           to: prevTo,
@@ -134,6 +121,7 @@ export class TransferService {
 
           await this.accountService.updateAccountBalanceByAmount(
             fromAccountId,
+            userId,
             fromAmountDiff,
           )
         }
@@ -148,6 +136,7 @@ export class TransferService {
 
           await this.accountService.updateAccountBalanceByAmount(
             toAccountId,
+            userId,
             toAmountDiff,
           )
         }
@@ -164,6 +153,8 @@ export class TransferService {
   async deleteTransfer(id: Types.ObjectId): Promise<void> {
     return await this.transactionService.executeInTransaction(async () => {
       const {
+        // TODO: take userId from updateTransfer params
+        userId,
         from: { accountId: fromAccountId, amount: fromAmount },
         to: { accountId: toAccountId, amount: toAmount },
       } = await this.getTransferById(id)
@@ -172,10 +163,12 @@ export class TransferService {
       await Promise.all([
         await this.accountService.updateAccountBalanceByAmount(
           toAccountId,
+          userId,
           -toAmount,
         ),
         await this.accountService.updateAccountBalanceByAmount(
           fromAccountId,
+          userId,
           -fromAmount,
         ),
       ])

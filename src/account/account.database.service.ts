@@ -86,12 +86,16 @@ export class AccountDatabaseService {
 
   async updateAccountBalanceByAmount(
     id: Types.ObjectId,
+    userId: Types.ObjectId,
     amount: number,
   ): Promise<Account> {
     const session = getSession()
 
-    const updatedAccount = await this.accountModel.findByIdAndUpdate(
-      id,
+    const updatedAccount = await this.accountModel.findOneAndUpdate(
+      {
+        _id: id,
+        userId,
+      },
       { $inc: { balance: amount } },
       { new: true, session },
     )

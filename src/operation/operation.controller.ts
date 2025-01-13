@@ -8,10 +8,14 @@ import {
   Patch,
   Post,
   Query,
+  Request,
+  UseGuards,
 } from '@nestjs/common'
+import type { Request as ExpressRequest } from 'express'
 
 import { OPERATIONS_ROUTE } from '../common/constants/routing.constants'
 import { IdParamDto } from '../common/dto/id-param.dto'
+import { UserOwnershipGuard } from '../common/guards/user-ownership.guard'
 import { CreateOperationDto } from './dto/create-operation.dto'
 import { OperationQueryParamsDto } from './dto/operation-query-params.dto'
 import { UpdateOperationDto } from './dto/update-operation.dto'
@@ -19,6 +23,7 @@ import { OperationService } from './operation.service'
 import type { Operation } from './schemas/operation.schema'
 
 @Controller(OPERATIONS_ROUTE)
+@UseGuards(UserOwnershipGuard)
 export class OperationController {
   constructor(private readonly operationService: OperationService) {}
 
@@ -30,31 +35,39 @@ export class OperationController {
   }
 
   @Get(':id')
-  async getOperationById(@Param() params: IdParamDto): Promise<Operation> {
-    return await this.operationService.getOperationById(params.id)
+  async getOperation(
+    @Param() params: IdParamDto,
+    @Request() req: ExpressRequest,
+  ): Promise<Operation> {
+    return await this.operationService.getOperation(params.id, req.user._id)
   }
 
   @Get()
-  async getOperationsByUser(
+  async getOperations(
     @Query() query: OperationQueryParamsDto,
   ): Promise<Operation[]> {
-    return await this.operationService.getOperationsByUser(query)
+    return await this.operationService.getOperations(query)
   }
 
   @Patch(':id')
   async updateOperation(
     @Param() params: IdParamDto,
+    @Request() req: ExpressRequest,
     @Body() updateOperationDto: UpdateOperationDto,
   ): Promise<Operation> {
     return await this.operationService.updateOperation(
       params.id,
+      req.user._id,
       updateOperationDto,
     )
   }
 
   @Delete(':id')
   @HttpCode(204)
-  async deleteOperation(@Param() params: IdParamDto): Promise<void> {
-    return await this.operationService.deleteOperation(params.id)
+  async deleteOperation(
+    @Param() params: IdParamDto,
+    @Request() req: ExpressRequest,
+  ): Promise<void> {
+    return await this.operationService.deleteOperation(params.id, req.user._id)
   }
 }

@@ -73,13 +73,14 @@ export class AccountService {
     return await this.accountDatabaseService.deleteAccount(id, userId)
   }
 
-  // ? TODO: - Add userId into updateAccountBalanceByAmount and update related methods;
   async updateAccountBalanceByAmount(
     id: Types.ObjectId,
+    userId: Types.ObjectId,
     amount: number,
   ): Promise<Account> {
     return await this.accountDatabaseService.updateAccountBalanceByAmount(
       id,
+      userId,
       amount,
     )
   }
