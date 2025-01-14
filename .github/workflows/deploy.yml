@@ -1,4 +1,4 @@
-name: Deploy to Cloud Run
+name: Deploy
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ on:
 
 jobs:
   deploy:
-    name: Authenticate to Google Cloud and Deploy to Cloud Run
+    name: Deploy to Google Cloud Run
     runs-on: ubuntu-latest
 
     steps:
