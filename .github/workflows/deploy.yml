@@ -35,4 +35,5 @@ jobs:
             --image ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }}:${{ github.event.inputs.tag }} \
             --platform managed \
             --region ${{ secrets.CLOUD_RUN_REGION }} \
-            --allow-unauthenticated
+            --allow-unauthenticated \
+            --set-env-vars MONGODB_URI=${{ secrets.MONGODB_URI }},JWT_SECRET=${{ secrets.JWT_SECRET }}
