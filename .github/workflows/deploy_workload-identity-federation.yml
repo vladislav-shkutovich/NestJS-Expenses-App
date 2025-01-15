@@ -1,6 +1,8 @@
 name: Deploy with Workload Identity Federation
 
 on:
+  pull_request:
+    branches: [main]
   workflow_dispatch:
     inputs:
       tag:
