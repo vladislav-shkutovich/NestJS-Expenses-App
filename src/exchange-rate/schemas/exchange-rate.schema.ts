@@ -1,16 +1,28 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { Types } from 'mongoose'
 
-// TODO: - Rework ExchangeRate schema to handle all necessary rates per day in one document;
+import { BASE_CURRENCY } from '../../common/constants/currency.constants'
+
+@Schema({ _id: false })
+class RateEntry {
+  @Prop({ required: true })
+  rate: number
+
+  @Prop({ required: true, isInteger: true })
+  scale: number
+}
+
+const RateEntrySchema = SchemaFactory.createForClass(RateEntry)
+
 @Schema({ versionKey: false, timestamps: true })
 export class ExchangeRate {
   _id: Types.ObjectId
 
-  @Prop({ required: true, default: 'BYN' })
+  @Prop({ required: true, default: BASE_CURRENCY })
   baseCurrency: string // Currency.code ref
 
-  @Prop({ required: true })
-  targetCurrency: string // Currency.code ref
+  @Prop({ required: true, default: 'National Bank of the Republic of Belarus' })
+  source: string
 
   @Prop({ type: Date, required: true })
   validFrom: Date
@@ -18,14 +30,8 @@ export class ExchangeRate {
   @Prop({ type: Date, required: true })
   validTo: Date
 
-  @Prop({ required: true })
-  rate: number
-
-  @Prop()
-  source?: string
-
-  @Prop({ required: true })
-  scale: number
+  @Prop({ type: Map, of: RateEntrySchema, required: true })
+  rates: Map<string, RateEntry>
 
   createdAt: Date
 
