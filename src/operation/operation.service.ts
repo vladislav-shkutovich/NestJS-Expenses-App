@@ -3,7 +3,7 @@ import { FilterQuery, Types } from 'mongoose'
 
 import { AccountService } from '../account/account.service'
 import { CategoryService } from '../category/category.service'
-import { ValidationError } from '../common/errors/errors'
+import { UnprocessableError } from '../common/errors/errors'
 import { TransactionService } from '../transaction/transaction.service'
 import { CreateOperationDto } from './dto/create-operation.dto'
 import { OperationQueryParamsDto } from './dto/operation-query-params.dto'
@@ -28,17 +28,12 @@ export class OperationService {
     return await this.transactionService.executeInTransaction(async () => {
       const { accountId, userId, categoryId, amount } = createOperationDto
 
-      const { currencyCode, userId: accountUserId } =
+      const { currencyCode } =
         await this.accountService.updateAccountBalanceByAmount(
           accountId,
+          userId,
           amount,
         )
-
-      if (!userId.equals(accountUserId)) {
-        throw new ValidationError(
-          'Specified in operation userId must match a userId in specified account',
-        )
-      }
 
       await this.validateOperationCategory(categoryId, userId)
 
@@ -49,30 +44,31 @@ export class OperationService {
     })
   }
 
-  async getOperationById(id: Types.ObjectId): Promise<Operation> {
-    return await this.operationDatabaseService.getOperationById(id)
+  async getOperation(
+    id: Types.ObjectId,
+    userId: Types.ObjectId,
+  ): Promise<Operation> {
+    return await this.operationDatabaseService.getOperation(id, userId)
   }
 
-  async getOperationsByUser(
-    options: OperationQueryParamsDto,
-  ): Promise<Operation[]> {
-    return await this.operationDatabaseService.getOperationsByUser(options)
+  async getOperations(options: OperationQueryParamsDto): Promise<Operation[]> {
+    return await this.operationDatabaseService.getOperations(options)
   }
 
   // TODO: - Recalculate Summary which affected by Operation date and amount on update operation;
   async updateOperation(
     id: Types.ObjectId,
+    userId: Types.ObjectId,
     updateOperationDto: UpdateOperationDto,
   ): Promise<Operation> {
     return await this.transactionService.executeInTransaction(async () => {
       const { categoryId, amount } = updateOperationDto
 
       if (categoryId || amount) {
-        const {
-          accountId,
+        const { accountId, amount: prevAmount } = await this.getOperation(
+          id,
           userId,
-          amount: prevAmount,
-        } = await this.getOperationById(id)
+        )
 
         if (categoryId) {
           await this.validateOperationCategory(categoryId, userId)
@@ -83,6 +79,7 @@ export class OperationService {
 
           await this.accountService.updateAccountBalanceByAmount(
             accountId,
+            userId,
             amountDiff,
           )
         }
@@ -90,20 +87,28 @@ export class OperationService {
 
       return await this.operationDatabaseService.updateOperation(
         id,
+        userId,
         updateOperationDto,
       )
     })
   }
 
   // TODO: - Recalculate Summary which affected by Operation amount on delete operation;
-  async deleteOperation(id: Types.ObjectId): Promise<void> {
+  async deleteOperation(
+    id: Types.ObjectId,
+    userId: Types.ObjectId,
+  ): Promise<void> {
     return await this.transactionService.executeInTransaction(async () => {
-      const { accountId, amount } = await this.getOperationById(id)
+      const { accountId, amount } = await this.getOperation(id, userId)
 
       // "-" sign before amount is required, since it's necessary to reduce the account balance by its value
-      await this.accountService.updateAccountBalanceByAmount(accountId, -amount)
+      await this.accountService.updateAccountBalanceByAmount(
+        accountId,
+        userId,
+        -amount,
+      )
 
-      return await this.operationDatabaseService.deleteOperation(id)
+      return await this.operationDatabaseService.deleteOperation(id, userId)
     })
   }
 
@@ -111,25 +116,15 @@ export class OperationService {
     operationCategoryId: Types.ObjectId,
     operationUserId: Types.ObjectId,
   ): Promise<void> {
-    const { isArchived, userId } =
-      await this.categoryService.getCategoryById(operationCategoryId)
-
-    const operationCategoryErrors: string[] = []
+    const { isArchived } = await this.categoryService.getCategory(
+      operationCategoryId,
+      operationUserId,
+    )
 
     if (isArchived) {
-      operationCategoryErrors.push(
+      throw new UnprocessableError(
         'Specified category for this operation is archived',
       )
-    }
-
-    if (!operationUserId.equals(userId)) {
-      operationCategoryErrors.push(
-        'Specified in operation userId must match a userId in specified category',
-      )
-    }
-
-    if (operationCategoryErrors.length > 0) {
-      throw new ValidationError(operationCategoryErrors.join('. '))
     }
   }
 

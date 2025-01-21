@@ -27,19 +27,25 @@ export class TransferDatabaseService {
     return createdTransfer.toObject()
   }
 
-  async getTransferById(id: Types.ObjectId): Promise<Transfer> {
-    const transferById = await this.transferModel.findById(id).lean()
+  async getTransfer(
+    id: Types.ObjectId,
+    userId: Types.ObjectId,
+  ): Promise<Transfer> {
+    const transfer = await this.transferModel
+      .findOne({
+        _id: id,
+        userId,
+      })
+      .lean()
 
-    if (!transferById) {
+    if (!transfer) {
       throw new NotFoundError(`Transfer with id ${id} not found`)
     }
 
-    return transferById
+    return transfer
   }
 
-  async getTransfersByUser(
-    options: TransferQueryParamsDto,
-  ): Promise<Transfer[]> {
+  async getTransfers(options: TransferQueryParamsDto): Promise<Transfer[]> {
     const {
       dateFrom,
       dateTo,
@@ -73,15 +79,23 @@ export class TransferDatabaseService {
 
   async updateTransfer(
     id: Types.ObjectId,
+    userId: Types.ObjectId,
     updateTransferDto: UpdateTransferContent,
   ): Promise<Transfer> {
     const session = getSession()
 
     const updatedTransfer = await this.transferModel
-      .findByIdAndUpdate(id, updateTransferDto, {
-        new: true,
-        session,
-      })
+      .findOneAndUpdate(
+        {
+          _id: id,
+          userId,
+        },
+        updateTransferDto,
+        {
+          new: true,
+          session,
+        },
+      )
       .lean()
 
     if (!updatedTransfer) {
@@ -91,11 +105,14 @@ export class TransferDatabaseService {
     return updatedTransfer
   }
 
-  async deleteTransfer(id: Types.ObjectId): Promise<void> {
+  async deleteTransfer(
+    id: Types.ObjectId,
+    userId: Types.ObjectId,
+  ): Promise<void> {
     const session = getSession()
 
     const { deletedCount } = await this.transferModel.deleteOne(
-      { _id: id },
+      { _id: id, userId },
       { session },
     )
 

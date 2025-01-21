@@ -32,32 +32,46 @@ export class CategoryDatabaseService {
     }
   }
 
-  async getCategoryById(id: Types.ObjectId): Promise<Category> {
-    const categoryById = await this.categoryModel.findById(id).lean()
+  async getCategory(
+    id: Types.ObjectId,
+    userId: Types.ObjectId,
+  ): Promise<Category> {
+    const category = await this.categoryModel
+      .findOne({
+        _id: id,
+        userId,
+      })
+      .lean()
 
-    if (!categoryById) {
+    if (!category) {
       throw new NotFoundError(`Category with id ${id} not found`)
     }
 
-    return categoryById
+    return category
   }
 
-  async getCategoriesByUser(
-    options: CategoryQueryParamsDto,
-  ): Promise<Category[]> {
+  async getCategories(options: CategoryQueryParamsDto): Promise<Category[]> {
     const filteredOptions = removeUndefined(options)
     return await this.categoryModel.find(filteredOptions).lean()
   }
 
   async updateCategory(
     id: Types.ObjectId,
+    userId: Types.ObjectId,
     updateCategoryOperators: UpdateCategoryOperators,
   ): Promise<Category> {
     try {
       const updatedCategory = await this.categoryModel
-        .findByIdAndUpdate(id, updateCategoryOperators, {
-          new: true,
-        })
+        .findOneAndUpdate(
+          {
+            _id: id,
+            userId,
+          },
+          updateCategoryOperators,
+          {
+            new: true,
+          },
+        )
         .lean()
 
       if (!updatedCategory) {
@@ -73,8 +87,14 @@ export class CategoryDatabaseService {
     }
   }
 
-  async deleteCategory(id: Types.ObjectId): Promise<void> {
-    const { deletedCount } = await this.categoryModel.deleteOne({ _id: id })
+  async deleteCategory(
+    id: Types.ObjectId,
+    userId: Types.ObjectId,
+  ): Promise<void> {
+    const { deletedCount } = await this.categoryModel.deleteOne({
+      _id: id,
+      userId,
+    })
 
     if (deletedCount === 0) {
       throw new NotFoundError(`Category with id ${id} not found`)

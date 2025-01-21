@@ -3,7 +3,6 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { Types } from 'mongoose'
 import { UnprocessableError } from '../common/errors/errors'
 import { OperationService } from '../operation/operation.service'
-import { UserService } from '../user/user.service'
 import { CategoryDatabaseService } from './category.database.service'
 import { UpdateCategoryOperators } from './category.types'
 import { CategoryQueryParamsDto } from './dto/category-query-params.dto'
@@ -17,35 +16,28 @@ export class CategoryService {
     private readonly categoryDatabaseService: CategoryDatabaseService,
     @Inject(forwardRef(() => OperationService))
     private readonly operationService: OperationService,
-    private readonly userService: UserService,
   ) {}
 
   async createCategory(
     createCategoryDto: CreateCategoryDto,
   ): Promise<Category> {
-    const { userId } = createCategoryDto
-
-    await this.userService.ensureUserExists(userId)
-
     return await this.categoryDatabaseService.createCategory(createCategoryDto)
   }
 
-  async getCategoryById(id: Types.ObjectId): Promise<Category> {
-    return await this.categoryDatabaseService.getCategoryById(id)
+  async getCategory(
+    id: Types.ObjectId,
+    userId: Types.ObjectId,
+  ): Promise<Category> {
+    return await this.categoryDatabaseService.getCategory(id, userId)
   }
 
-  async getCategoriesByUser(
-    options: CategoryQueryParamsDto,
-  ): Promise<Category[]> {
-    const { userId } = options
-
-    await this.userService.ensureUserExists(userId)
-
-    return await this.categoryDatabaseService.getCategoriesByUser(options)
+  async getCategories(options: CategoryQueryParamsDto): Promise<Category[]> {
+    return await this.categoryDatabaseService.getCategories(options)
   }
 
   async updateCategory(
     id: Types.ObjectId,
+    userId: Types.ObjectId,
     updateCategoryDto: UpdateCategoryDto,
   ): Promise<Category> {
     const { isArchived } = updateCategoryDto
@@ -65,11 +57,15 @@ export class CategoryService {
 
     return await this.categoryDatabaseService.updateCategory(
       id,
+      userId,
       updateCategoryOperators,
     )
   }
 
-  async deleteCategory(id: Types.ObjectId): Promise<void> {
+  async deleteCategory(
+    id: Types.ObjectId,
+    userId: Types.ObjectId,
+  ): Promise<void> {
     const isCategoryUsedInOperations =
       await this.operationService.isOperationExistByQuery({
         categoryId: id,
@@ -81,6 +77,6 @@ export class CategoryService {
       )
     }
 
-    return await this.categoryDatabaseService.deleteCategory(id)
+    return await this.categoryDatabaseService.deleteCategory(id, userId)
   }
 }

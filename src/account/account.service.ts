@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
 import { Types } from 'mongoose'
-import { ConflictError, ValidationError } from '../common/errors/errors'
-import { UserService } from '../user/user.service'
+import { ConflictError, UnprocessableError } from '../common/errors/errors'
 import { AccountDatabaseService } from './account.database.service'
 import { AccountType } from './account.types'
 import { AccountQueryParamsDto } from './dto/account-query-params.dto'
@@ -14,50 +13,56 @@ import type { Account } from './schemas/account.schema'
 export class AccountService {
   constructor(
     private readonly accountDatabaseService: AccountDatabaseService,
-    private readonly userService: UserService,
   ) {}
 
   async createAccount(createAccountDto: CreateAccountDto): Promise<Account> {
-    const { userId, accountType, isSavings } = createAccountDto
+    const { accountType, isSavings } = createAccountDto
 
     if (accountType === AccountType.LOAN && isSavings) {
-      throw new ValidationError('Loan account type cannot be marked as savings')
+      throw new UnprocessableError(
+        'Loan account type cannot be marked as savings',
+      )
     }
-
-    await this.userService.ensureUserExists(userId)
 
     return await this.accountDatabaseService.createAccount(createAccountDto)
   }
 
-  async getAccountById(id: Types.ObjectId): Promise<Account> {
-    return await this.accountDatabaseService.getAccountById(id)
+  async getAccount(
+    id: Types.ObjectId,
+    userId: Types.ObjectId,
+  ): Promise<Account> {
+    return await this.accountDatabaseService.getAccount(id, userId)
   }
 
-  async getAccountsByUser(options: AccountQueryParamsDto): Promise<Account[]> {
-    const { userId } = options
-
-    await this.userService.ensureUserExists(userId)
-
-    return await this.accountDatabaseService.getAccountsByUser(options)
+  async getAccounts(options: AccountQueryParamsDto): Promise<Account[]> {
+    return await this.accountDatabaseService.getAccounts(options)
   }
 
   async updateAccount(
     id: Types.ObjectId,
+    userId: Types.ObjectId,
     updateAccountDto: UpdateAccountDto,
   ): Promise<Account> {
-    const { accountType } = await this.getAccountById(id)
+    const { accountType } = await this.getAccount(id, userId)
 
     if (accountType === AccountType.LOAN && updateAccountDto.accountType) {
-      throw new ValidationError(
+      throw new UnprocessableError(
         'Changing the account type for loan accounts is not possible',
       )
     }
 
-    return await this.accountDatabaseService.updateAccount(id, updateAccountDto)
+    return await this.accountDatabaseService.updateAccount(
+      id,
+      userId,
+      updateAccountDto,
+    )
   }
 
-  async deleteAccount(id: Types.ObjectId): Promise<void> {
-    const { balance } = await this.getAccountById(id)
+  async deleteAccount(
+    id: Types.ObjectId,
+    userId: Types.ObjectId,
+  ): Promise<void> {
+    const { balance } = await this.getAccount(id, userId)
 
     if (balance !== 0) {
       throw new ConflictError(
@@ -65,15 +70,17 @@ export class AccountService {
       )
     }
 
-    return await this.accountDatabaseService.deleteAccount(id)
+    return await this.accountDatabaseService.deleteAccount(id, userId)
   }
 
   async updateAccountBalanceByAmount(
     id: Types.ObjectId,
+    userId: Types.ObjectId,
     amount: number,
   ): Promise<Account> {
     return await this.accountDatabaseService.updateAccountBalanceByAmount(
       id,
+      userId,
       amount,
     )
   }
