@@ -1,4 +1,4 @@
-name: Deploy with JSON Key
+name: Deploy to Cloud Run
 
 on:
   workflow_dispatch:
@@ -9,10 +9,11 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   deploy:
-    name: Deploy to Cloud Run (using JSON key)
+    name: Deploy to Cloud Run (using WIF)
     runs-on: ubuntu-latest
 
     steps:
@@ -20,10 +21,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Google Cloud Auth
-        uses: 'google-github-actions/auth@v2'
+        uses: 'google-github-actions/auth@v1'
         with:
-          credentials_json: '${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}'
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set Project Id
+        run: gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
 
       - name: Set up Cloud SDK
         uses: 'google-github-actions/setup-gcloud@v2'
