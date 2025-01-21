@@ -33,21 +33,21 @@ export class UserController {
   }
 
   @Get(':id')
-  async getUserById(@Param() params: IdParamDto): Promise<UserWithoutPassword> {
-    return await this.userService.getUserById(params.id)
+  async getUserById(@Param() { id }: IdParamDto): Promise<UserWithoutPassword> {
+    return await this.userService.getUserById(id)
   }
 
   @Patch(':id')
   async updateUser(
-    @Param() params: IdParamDto,
+    @Param() { id }: IdParamDto,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<UserWithoutPassword> {
-    return await this.userService.updateUser(params.id, updateUserDto)
+    return await this.userService.updateUser(id, updateUserDto)
   }
 
   @Delete(':id')
   @HttpCode(204)
-  async deleteUser(@Param() params: IdParamDto): Promise<void> {
-    return await this.userService.deleteUser(params.id)
+  async deleteUser(@Param() { id }: IdParamDto): Promise<void> {
+    return await this.userService.deleteUser(id)
   }
 }

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { PassportStrategy } from '@nestjs/passport'
+import { Types } from 'mongoose'
 import { ExtractJwt, Strategy } from 'passport-jwt'
 
 import { throwMissingEnvVar } from '../../common/utils/env.utils'
@@ -20,8 +21,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   validate(payload: UserJwtPayload): UserWithoutPassword {
-    const payloadClone = globalThis.structuredClone(payload)
-    delete payloadClone.sub
-    return payloadClone
+    const { sub: _sub, ...user } = payload
+    return { ...user, _id: new Types.ObjectId(user._id) }
   }
 }

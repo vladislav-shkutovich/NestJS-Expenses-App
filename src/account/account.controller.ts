@@ -36,10 +36,10 @@ export class AccountController {
 
   @Get(':id')
   async getAccount(
-    @Param() params: IdParamDto,
-    @Request() req: ExpressRequest,
+    @Param() { id }: IdParamDto,
+    @Request() { user: { _id: userId } }: ExpressRequest,
   ): Promise<Account> {
-    return await this.accountService.getAccount(params.id, req.user._id)
+    return await this.accountService.getAccount(id, userId)
   }
 
   @Get()
@@ -49,23 +49,19 @@ export class AccountController {
 
   @Patch(':id')
   async updateAccount(
-    @Param() params: IdParamDto,
-    @Request() req: ExpressRequest,
+    @Param() { id }: IdParamDto,
+    @Request() { user: { _id: userId } }: ExpressRequest,
     @Body() updateAccountDto: UpdateAccountDto,
   ): Promise<Account> {
-    return await this.accountService.updateAccount(
-      params.id,
-      req.user._id,
-      updateAccountDto,
-    )
+    return await this.accountService.updateAccount(id, userId, updateAccountDto)
   }
 
   @Delete(':id')
   @HttpCode(204)
   async deleteAccount(
-    @Param() params: IdParamDto,
-    @Request() req: ExpressRequest,
+    @Param() { id }: IdParamDto,
+    @Request() { user: { _id: userId } }: ExpressRequest,
   ): Promise<void> {
-    return await this.accountService.deleteAccount(params.id, req.user._id)
+    return await this.accountService.deleteAccount(id, userId)
   }
 }

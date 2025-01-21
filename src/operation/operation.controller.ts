@@ -36,10 +36,10 @@ export class OperationController {
 
   @Get(':id')
   async getOperation(
-    @Param() params: IdParamDto,
-    @Request() req: ExpressRequest,
+    @Param() { id }: IdParamDto,
+    @Request() { user: { _id: userId } }: ExpressRequest,
   ): Promise<Operation> {
-    return await this.operationService.getOperation(params.id, req.user._id)
+    return await this.operationService.getOperation(id, userId)
   }
 
   @Get()
@@ -51,13 +51,13 @@ export class OperationController {
 
   @Patch(':id')
   async updateOperation(
-    @Param() params: IdParamDto,
-    @Request() req: ExpressRequest,
+    @Param() { id }: IdParamDto,
+    @Request() { user: { _id: userId } }: ExpressRequest,
     @Body() updateOperationDto: UpdateOperationDto,
   ): Promise<Operation> {
     return await this.operationService.updateOperation(
-      params.id,
-      req.user._id,
+      id,
+      userId,
       updateOperationDto,
     )
   }
@@ -65,9 +65,9 @@ export class OperationController {
   @Delete(':id')
   @HttpCode(204)
   async deleteOperation(
-    @Param() params: IdParamDto,
-    @Request() req: ExpressRequest,
+    @Param() { id }: IdParamDto,
+    @Request() { user: { _id: userId } }: ExpressRequest,
   ): Promise<void> {
-    return await this.operationService.deleteOperation(params.id, req.user._id)
+    return await this.operationService.deleteOperation(id, userId)
   }
 }

@@ -36,10 +36,10 @@ export class CategoryController {
 
   @Get(':id')
   async getCategory(
-    @Param() params: IdParamDto,
-    @Request() req: ExpressRequest,
+    @Param() { id }: IdParamDto,
+    @Request() { user: { _id: userId } }: ExpressRequest,
   ): Promise<Category> {
-    return await this.categoryService.getCategory(params.id, req.user._id)
+    return await this.categoryService.getCategory(id, userId)
   }
 
   @Get()
@@ -51,13 +51,13 @@ export class CategoryController {
 
   @Patch(':id')
   async updateCategory(
-    @Param() params: IdParamDto,
-    @Request() req: ExpressRequest,
+    @Param() { id }: IdParamDto,
+    @Request() { user: { _id: userId } }: ExpressRequest,
     @Body() updateCategoryDto: UpdateCategoryDto,
   ): Promise<Category> {
     return await this.categoryService.updateCategory(
-      params.id,
-      req.user._id,
+      id,
+      userId,
       updateCategoryDto,
     )
   }
@@ -65,9 +65,9 @@ export class CategoryController {
   @Delete(':id')
   @HttpCode(204)
   async deleteCategory(
-    @Param() params: IdParamDto,
-    @Request() req: ExpressRequest,
+    @Param() { id }: IdParamDto,
+    @Request() { user: { _id: userId } }: ExpressRequest,
   ): Promise<void> {
-    return await this.categoryService.deleteCategory(params.id, req.user._id)
+    return await this.categoryService.deleteCategory(id, userId)
   }
 }

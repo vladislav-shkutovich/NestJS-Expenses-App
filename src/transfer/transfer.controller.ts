@@ -36,10 +36,10 @@ export class TransferController {
 
   @Get(':id')
   async getTransfer(
-    @Param() params: IdParamDto,
-    @Request() req: ExpressRequest,
+    @Param() { id }: IdParamDto,
+    @Request() { user: { _id: userId } }: ExpressRequest,
   ): Promise<Transfer> {
-    return await this.transferService.getTransfer(params.id, req.user._id)
+    return await this.transferService.getTransfer(id, userId)
   }
 
   @Get()
@@ -51,13 +51,13 @@ export class TransferController {
 
   @Patch(':id')
   async updateTransfer(
-    @Param() params: IdParamDto,
-    @Request() req: ExpressRequest,
+    @Param() { id }: IdParamDto,
+    @Request() { user: { _id: userId } }: ExpressRequest,
     @Body() updateTransferDto: UpdateTransferDto,
   ): Promise<Transfer> {
     return await this.transferService.updateTransfer(
-      params.id,
-      req.user._id,
+      id,
+      userId,
       updateTransferDto,
     )
   }
@@ -65,9 +65,9 @@ export class TransferController {
   @Delete(':id')
   @HttpCode(204)
   async deleteTransfer(
-    @Param() params: IdParamDto,
-    @Request() req: ExpressRequest,
+    @Param() { id }: IdParamDto,
+    @Request() { user: { _id: userId } }: ExpressRequest,
   ): Promise<void> {
-    return await this.transferService.deleteTransfer(params.id, req.user._id)
+    return await this.transferService.deleteTransfer(id, userId)
   }
 }

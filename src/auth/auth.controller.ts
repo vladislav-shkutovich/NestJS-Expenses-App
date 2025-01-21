@@ -13,10 +13,10 @@ export class AuthController {
   @Public()
   @UseGuards(LocalAuthGuard)
   @Post(LOGIN_ROUTE)
-  async login(@Request() req: ExpressRequest): Promise<{
+  async login(@Request() { user }: ExpressRequest): Promise<{
     access_token: string
   }> {
-    const accessToken = await this.authService.getAccessToken(req.user)
+    const accessToken = await this.authService.getAccessToken(user)
     return {
       access_token: accessToken,
     }

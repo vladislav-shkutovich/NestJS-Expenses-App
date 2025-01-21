@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { AuthGuard } from '@nestjs/passport'
-import { Types } from 'mongoose'
 
 import type { UserWithoutPassword } from '../../user/user.types'
 
@@ -31,6 +30,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       console.error('Authorization error:', { error, user })
       throw new UnauthorizedException()
     }
-    return { ...user, _id: new Types.ObjectId(user._id) }
+    return user
   }
 }
