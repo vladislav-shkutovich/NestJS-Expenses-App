@@ -1,4 +1,4 @@
-name: Docker Image, Tags and Release
+name: Docker, Tag and Release
 
 on:
   push:
@@ -12,7 +12,7 @@ on:
 
 jobs:
   build-and-push:
-    name: Build and Push Docker Image, Create Tag and Release
+    name: Build and push Docker Image, create Tag and Release
     runs-on: ubuntu-latest
 
     steps:
@@ -42,30 +42,36 @@ jobs:
         id: set_tag
         run: |
           if [ "${{ github.ref }}" == "refs/heads/cd-cd-phase-2" ]; then
-            VERSION=$(jq -r .version < package.json)
-            if [[ ! "$VERSION" =~ ^v?([0-9]+)\.([0-9]+)\.([0-9]+)(-[A-Za-z0-9-.]+)?(\+[A-Za-z0-9-.]+)?$ ]]; then
+            VERSION=$(node -p "require('./package.json').version")
+            if [[ ! "$VERSION" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(-[A-Za-z0-9-.]+)?(\+[A-Za-z0-9-.]+)?$ ]]; then
               echo "Invalid version format in package.json. Must follow SemVer."
               exit 1
             fi
-            TAGS="${{ steps.get_branch.outputs.branch }},${{ steps.get_sha.outputs.commit_sha }},v${VERSION}"
-            echo "tags=${TAGS}" >> $GITHUB_OUTPUT
-          else
-            TAGS="${{ steps.get_branch.outputs.branch }},${{ steps.get_sha.outputs.commit_sha }}"
-            echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+            TAG_VERSIONS="v$VERSION"
+            echo "version_tag=$TAG_VERSIONS" >> $GITHUB_OUTPUT
           fi
+
+          BRANCH_TAG="${{ steps.get_branch.outputs.branch }}"
+          COMMIT_TAG="${{ steps.get_sha.outputs.commit_sha }}"
+          if [ "${{ github.ref }}" == "refs/heads/cd-cd-phase-2" ]; then
+            TAGS="$BRANCH_TAG,$COMMIT_TAG,$TAG_VERSIONS"
+          else
+            TAGS="$BRANCH_TAG,$COMMIT_TAG"
+          fi
+          echo "tags=$TAGS" >> $GITHUB_OUTPUT
 
       - name: Build Docker Image
         run: |
           IFS=',' read -r -a TAG_ARRAY <<< "${{ steps.set_tag.outputs.tags }}"
           for tag in "${TAG_ARRAY[@]}"; do
-            docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }}:${tag} .
+            docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }}:$tag .
           done
 
       - name: Push Docker Image
         run: |
           IFS=',' read -r -a TAG_ARRAY <<< "${{ steps.set_tag.outputs.tags }}"
           for tag in "${TAG_ARRAY[@]}"; do
-            docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }}:${tag}
+            docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }}:$tag
           done
 
       - name: Create GitHub Release and Tag (Main Branch Only)
@@ -74,8 +80,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v$(jq -r .version < package.json)
-          release_name: Release v$(jq -r .version < package.json)
-          body: 'Release version $(jq -r .version < package.json)'
+          tag_name: ${{ steps.set_tag.outputs.version_tag }}
+          release_name: Release ${{ steps.set_tag.outputs.version_tag }}
+          body: 'Release version ${{ steps.set_tag.outputs.version_tag }}'
           draft: false
           prerelease: false
