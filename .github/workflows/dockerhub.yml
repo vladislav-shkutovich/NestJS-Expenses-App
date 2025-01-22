@@ -18,11 +18,20 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '22.12.0'
+
+      - name: Display Git Branch
+        run: |
+          echo "Current branch: ${GITHUB_REF}"
+
+      - name: Display package.json
+        run: cat package.json
 
       - name: Get Branch Name
         id: get_branch
@@ -43,6 +52,7 @@ jobs:
         run: |
           if [ "${{ github.ref }}" == "refs/heads/cd-cd-phase-2" ]; then
             VERSION=$(node -p "require('./package.json').version")
+            echo "Extracted VERSION: $VERSION"
             if [[ ! "$VERSION" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(-[A-Za-z0-9-.]+)?(\+[A-Za-z0-9-.]+)?$ ]]; then
               echo "Invalid version format in package.json. Must follow SemVer."
               exit 1
@@ -59,6 +69,13 @@ jobs:
             TAGS="$BRANCH_TAG,$COMMIT_TAG"
           fi
           echo "tags=$TAGS" >> $GITHUB_OUTPUT
+
+      - name: Debug Tags
+        run: |
+          echo "Branch Tag: ${{ steps.get_branch.outputs.branch }}"
+          echo "Commit Tag: ${{ steps.get_sha.outputs.commit_sha }}"
+          echo "Version Tag: ${{ steps.set_tag.outputs.version_tag }}"
+          echo "All Tags: ${{ steps.set_tag.outputs.tags }}"
 
       - name: Build Docker Image
         run: |
