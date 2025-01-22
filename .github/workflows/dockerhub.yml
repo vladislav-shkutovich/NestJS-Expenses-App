@@ -51,17 +51,16 @@ jobs:
         id: set_tag
         run: |
           if [ "${{ github.ref }}" == "refs/heads/cd-cd-phase-2" ]; then
-            VERSION=$(node -p "require('./package.json').version")
+            VERSION=$(node -p "require('./package.json').version" | tr -d ' \n')
             echo "Extracted VERSION: $VERSION"
-            if [[ ! "$VERSION" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(-[A-Za-z0-9-.]+)?(\+[A-Za-z0-9-.]+)?$ ]]; then
-              echo "Invalid version format in package.json. Must follow SemVer."
+            if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "Invalid version format in package.json. Must follow SemVer (e.g., 0.1.0)."
               exit 1
             fi
             TAG_VERSIONS="v$VERSION"
             echo "version_tag=$TAG_VERSIONS" >> $GITHUB_OUTPUT
           fi
-
-          BRANCH_TAG="${{ steps.get_branch.outputs.branch }}"
+                 BRANCH_TAG="${{ steps.get_branch.outputs.branch }}"
           COMMIT_TAG="${{ steps.get_sha.outputs.commit_sha }}"
           if [ "${{ github.ref }}" == "refs/heads/cd-cd-phase-2" ]; then
             TAGS="$BRANCH_TAG,$COMMIT_TAG,$TAG_VERSIONS"
