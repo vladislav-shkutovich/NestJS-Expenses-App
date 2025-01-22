@@ -26,13 +26,6 @@ jobs:
         with:
           node-version: '22.12.0'
 
-      - name: Display Git Branch
-        run: |
-          echo "Current branch: ${GITHUB_REF}"
-
-      - name: Display package.json
-        run: cat package.json
-
       - name: Get Branch Name
         id: get_branch
         run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
@@ -70,7 +63,6 @@ jobs:
             fi
 
             version_greater_or_equal() {
-              # Разбиваем версии на части
               IFS='.' read -r MAJOR1 MINOR1 PATCH1 <<< "$1"
               IFS='.' read -r MAJOR2 MINOR2 PATCH2 <<< "$2"
 
