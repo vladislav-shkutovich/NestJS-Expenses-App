@@ -37,6 +37,8 @@ jobs:
           fi
           echo "Version format is valid."
 
+      # !!! get package.json version from main instead of tag
+      # !!! validate tag separately or version validation is pretty enough?
       - name: Set Previous Version
         id: get_previous_version
         run: |
@@ -59,13 +61,13 @@ jobs:
 
             if (( MAJOR1 > MAJOR2 )); then
               return 0
-            elif (( MAJOR1 <= MAJOR2 )); then
+            elif (( MAJOR1 < MAJOR2 )); then
               return 1
             fi
 
             if (( MINOR1 > MINOR2 )); then
               return 0
-            elif (( MINOR1 <= MINOR2 )); then
+            elif (( MINOR1 < MINOR2 )); then
               return 1
             fi
 
