@@ -37,12 +37,10 @@ jobs:
           fi
           echo "Version format is valid."
 
-      # !!! get package.json version from main instead of tag
-      # !!! validate tag separately or version validation is pretty enough?
       - name: Set Previous Version
         id: get_previous_version
         run: |
-          PREV_TAG=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' | sort -V | tail -n1)
+          PREV_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
           if [ -z "$PREV_TAG" ]; then
             echo "prev_version=0.0.0" >> $GITHUB_OUTPUT
           else
