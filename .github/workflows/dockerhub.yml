@@ -1,9 +1,6 @@
 name: Docker, Tag and Release
 
 on:
-  push:
-    branches:
-      - '**'
   workflow_dispatch:
     inputs:
       tag:
