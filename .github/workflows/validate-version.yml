@@ -1,4 +1,4 @@
-name: Validate Project Version
+name: Validate version
 
 on:
   pull_request:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   validate-version:
-    name: Validate package.json Version
+    name: Validate project version in package.json
     runs-on: ubuntu-latest
 
     steps:
@@ -20,10 +20,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '22.12.0'
-
-      - name: Get Current Branch
-        id: get_branch
-        run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
 
       - name: Extract Version from package.json
         id: extract_version
@@ -41,8 +37,8 @@ jobs:
           fi
           echo "Version format is valid."
 
-      - name: Get Latest Tag
-        id: get_latest_tag
+      - name: Set Previous Version
+        id: get_previous_version
         run: |
           PREV_TAG=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' | sort -V | tail -n1)
           if [ -z "$PREV_TAG" ]; then
@@ -55,34 +51,34 @@ jobs:
       - name: Compare Versions
         run: |
           VERSION=${{ steps.extract_version.outputs.version }}
-          PREV_VERSION=${{ steps.get_latest_tag.outputs.prev_version }}
+          PREV_VERSION=${{ steps.get_previous_version.outputs.prev_version }}
 
-          version_greater_or_equal() {
+          is_version_greater() {
             IFS='.' read -r MAJOR1 MINOR1 PATCH1 <<< "$1"
             IFS='.' read -r MAJOR2 MINOR2 PATCH2 <<< "$2"
 
             if (( MAJOR1 > MAJOR2 )); then
               return 0
-            elif (( MAJOR1 < MAJOR2 )); then
+            elif (( MAJOR1 <= MAJOR2 )); then
               return 1
             fi
 
             if (( MINOR1 > MINOR2 )); then
               return 0
-            elif (( MINOR1 < MINOR2 )); then
+            elif (( MINOR1 <= MINOR2 )); then
               return 1
             fi
 
-            if (( PATCH1 >= PATCH2 )); then
+            if (( PATCH1 > PATCH2 )); then
               return 0
             else
               return 1
             fi
           }
 
-          if version_greater_or_equal "$VERSION" "$PREV_VERSION"; then
-            echo "New version ($VERSION) is valid and not lower than the previous version ($PREV_VERSION)."
+          if is_version_greater "$VERSION" "$PREV_VERSION"; then
+            echo "New version ($VERSION) is valid and greater than the previous version ($PREV_VERSION)."
           else
-            echo "New version ($VERSION) is lower than the previous version ($PREV_VERSION)."
+            echo "New version ($VERSION) is lower or equal than the previous version ($PREV_VERSION)."
             exit 1
           fi
