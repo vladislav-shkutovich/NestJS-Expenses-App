@@ -22,7 +22,7 @@ jobs:
 
       - name: Set Branch Name
         id: set_branch
-        run: echo "branch='main'" >> $GITHUB_OUTPUT
+        run: echo "branch=main" >> $GITHUB_OUTPUT
 
       - name: Set Commit SHA
         id: set_sha
