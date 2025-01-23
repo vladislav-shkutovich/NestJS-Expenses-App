@@ -25,7 +25,7 @@ jobs:
 
       - name: Set Commit SHA
         id: set_sha
-        run: echo "commit_sha=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+        run: echo "commit_sha=$(git rev-parse --short=7 ${{ github.event.pull_request.head.sha }})" >> $GITHUB_OUTPUT
 
       - name: Set Tags
         id: set_tags
