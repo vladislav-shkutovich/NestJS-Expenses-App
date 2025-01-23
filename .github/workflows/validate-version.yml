@@ -1,0 +1,84 @@
+name: Validate version
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate-version:
+    name: Validate project version in package.json
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.12.0'
+
+      - name: Extract Version from package.json
+        id: extract_version
+        run: |
+          VERSION=$(node -p "require('./package.json').version" | tr -d ' \n')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Validate Version Format
+        run: |
+          VERSION=${{ steps.extract_version.outputs.version }}
+          SEMVER_REGEX="^[0-9]+\.[0-9]+\.[0-9]+$"
+          if [[ ! "$VERSION" =~ $SEMVER_REGEX ]]; then
+            echo "Invalid version format in package.json. Must follow SemVer (e.g., 0.1.0)."
+            exit 1
+          fi
+          echo "Version format is valid."
+
+      - name: Set Previous Version
+        id: get_previous_version
+        run: |
+          PREV_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+          if [ -z "$PREV_TAG" ]; then
+            echo "prev_version=0.0.0" >> $GITHUB_OUTPUT
+          else
+            PREV_VERSION=${PREV_TAG#v}
+            echo "prev_version=$PREV_VERSION" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Compare Versions
+        run: |
+          VERSION=${{ steps.extract_version.outputs.version }}
+          PREV_VERSION=${{ steps.get_previous_version.outputs.prev_version }}
+
+          is_version_greater() {
+            IFS='.' read -r MAJOR1 MINOR1 PATCH1 <<< "$1"
+            IFS='.' read -r MAJOR2 MINOR2 PATCH2 <<< "$2"
+
+            if (( MAJOR1 > MAJOR2 )); then
+              return 0
+            elif (( MAJOR1 < MAJOR2 )); then
+              return 1
+            fi
+
+            if (( MINOR1 > MINOR2 )); then
+              return 0
+            elif (( MINOR1 < MINOR2 )); then
+              return 1
+            fi
+
+            if (( PATCH1 > PATCH2 )); then
+              return 0
+            else
+              return 1
+            fi
+          }
+
+          if is_version_greater "$VERSION" "$PREV_VERSION"; then
+            echo "New version ($VERSION) is valid and greater than the previous version ($PREV_VERSION)."
+          else
+            echo "New version ($VERSION) is lower or equal than the previous version ($PREV_VERSION)."
+            exit 1
+          fi
