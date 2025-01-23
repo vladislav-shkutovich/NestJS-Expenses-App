@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-      - 'cd-cd-phase-2'
+      - 'main'
   workflow_dispatch:
 
 jobs:
