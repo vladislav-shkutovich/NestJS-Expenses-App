@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-push:
+  push-docker-create-release-and-tag:
     name: Build and push Docker Image, create Release and Tag
     runs-on: ubuntu-latest
 
