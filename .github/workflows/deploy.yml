@@ -1,4 +1,4 @@
-name: Deploy to Cloud Run
+name: Deploy
 
 on:
   workflow_dispatch:
@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   deploy:
-    name: Deploy to Cloud Run (using WIF)
+    name: Deploy to Cloud Run
     runs-on: ubuntu-latest
 
     steps:
