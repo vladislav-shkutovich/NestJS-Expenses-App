@@ -40,7 +40,7 @@ export class ExchangeRateService implements OnApplicationBootstrap {
       this.sourceOnBootstrap,
     )
 
-    // await this.exchangeRateDatabaseService.insertExchangeRates(ratesOnDateRange)
+    await this.exchangeRateDatabaseService.insertExchangeRates(ratesOnDateRange)
     console.debug(`Inserted ${ratesOnDateRange.length} exchange rate records.`)
   }
 
