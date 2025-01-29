@@ -5,7 +5,7 @@ const source =
 function getDateRange(dateFrom, dateTo) {
   const dateArray = []
   const endDate = new Date(dateTo)
-  let currentDate = new Date(dateFrom)
+  const currentDate = new Date(dateFrom)
 
   while (currentDate <= endDate) {
     dateArray.push(new Date(currentDate).toISOString().split('T')[0])
