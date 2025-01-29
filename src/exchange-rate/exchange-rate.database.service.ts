@@ -15,17 +15,17 @@ export class ExchangeRateDatabaseService {
     private exchangeRateModel: Model<ExchangeRate>,
   ) {}
 
-  async insertExchangeRates(
-    createExchangeRatesContent: CreateExchangeRateContent[],
-  ): Promise<void> {
-    await this.exchangeRateModel.insertMany(createExchangeRatesContent)
-  }
-
   async getExchangeRates(
     options: ExchangeRateQueryParamsDto,
   ): Promise<ExchangeRate[]> {
     console.error('mock options', options)
     return [] as ExchangeRate[]
+  }
+
+  async insertExchangeRates(
+    createExchangeRatesContent: CreateExchangeRateContent[],
+  ): Promise<void> {
+    await this.exchangeRateModel.insertMany(createExchangeRatesContent)
   }
 
   async getLatestValidTo(): Promise<Date> {

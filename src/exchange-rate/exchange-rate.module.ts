@@ -6,6 +6,7 @@ import { CurrencyModule } from '../currency/currency.module'
 import { ExchangeRateController } from './exchange-rate.controller'
 import { ExchangeRateDatabaseService } from './exchange-rate.database.service'
 import { ExchangeRateService } from './exchange-rate.service'
+import { NbrbApiService } from './nbrb-api.service'
 import { ExchangeRateSchema } from './schemas/exchange-rate.schema'
 
 @Module({
@@ -16,6 +17,6 @@ import { ExchangeRateSchema } from './schemas/exchange-rate.schema'
     CurrencyModule,
   ],
   controllers: [ExchangeRateController],
-  providers: [ExchangeRateService, ExchangeRateDatabaseService],
+  providers: [NbrbApiService, ExchangeRateService, ExchangeRateDatabaseService],
 })
 export class ExchangeRateModule {}
