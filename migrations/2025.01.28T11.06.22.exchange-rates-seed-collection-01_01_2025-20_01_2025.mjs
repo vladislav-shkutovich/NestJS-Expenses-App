@@ -1,6 +1,6 @@
 const baseCurrency = 'BYN'
 const source =
-  'Migration 2025.01.28T11.06.22.exchange-rates-seed-collection-01_01_2025-20_01_2025'
+  'NBRB API: Migration 2025.01.28T11.06.22.exchange-rates-seed-collection-01_01_2025-20_01_2025'
 
 function getDateRange(dateFrom, dateTo) {
   const dateArray = []
