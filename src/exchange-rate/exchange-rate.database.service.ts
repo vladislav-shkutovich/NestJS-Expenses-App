@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { Model } from 'mongoose'
+import { FilterQuery, Model } from 'mongoose'
 
 import { EXCHANGE_RATE_MODEL } from '../common/constants/database.constants'
 import { NotFoundError } from '../common/errors/errors'
+import { removeUndefined } from '../common/utils/formatting.utils'
 import { ExchangeRateQueryParamsDto } from './dto/exchange-rate-query-params.dto'
 import type { CreateExchangeRateContent } from './exchange-rate.types'
 import type { ExchangeRate } from './schemas/exchange-rate.schema'
@@ -15,11 +16,24 @@ export class ExchangeRateDatabaseService {
     private exchangeRateModel: Model<ExchangeRate>,
   ) {}
 
-  async getExchangeRates(
+  async getExchangeRatesOnDate(
     options: ExchangeRateQueryParamsDto,
   ): Promise<ExchangeRate[]> {
-    console.error('mock options', options)
-    return [] as ExchangeRate[]
+    const { date: specifiedDate, ...restOptions } = removeUndefined(options)
+
+    const date = specifiedDate || new Date()
+
+    const query: FilterQuery<ExchangeRate> = {
+      ...restOptions,
+      validFrom: {
+        $lte: date,
+      },
+      validTo: {
+        $gte: date,
+      },
+    }
+
+    return await this.exchangeRateModel.find(query).lean()
   }
 
   async insertExchangeRates(

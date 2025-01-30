@@ -35,10 +35,12 @@ export class ExchangeRateService implements OnApplicationBootstrap {
     await this.insertMissingRatesUpToCurrentDate(this.SOURCE_ON_CRON)
   }
 
-  async getExchangeRates(
+  async getExchangeRatesOnDate(
     options: ExchangeRateQueryParamsDto,
   ): Promise<ExchangeRate[]> {
-    return await this.exchangeRateDatabaseService.getExchangeRates(options)
+    return await this.exchangeRateDatabaseService.getExchangeRatesOnDate(
+      options,
+    )
   }
 
   private async insertMissingRatesUpToCurrentDate(
