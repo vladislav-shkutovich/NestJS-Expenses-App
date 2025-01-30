@@ -57,7 +57,7 @@ $ yarn run test:e2e
 $ yarn run test:cov
 ```
 
-## Migrations
+## Migrations (with UTC timezone)
 
 #### Create a new migration template
 
