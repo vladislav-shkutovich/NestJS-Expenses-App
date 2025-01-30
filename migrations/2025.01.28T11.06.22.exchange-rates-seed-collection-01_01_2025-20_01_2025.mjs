@@ -75,7 +75,7 @@ export async function up({ context }) {
         validTo.setDate(validTo.getDate() + 1)
 
         const formattedRatesOnDate = ratesOnDateByCurrencies.map((rate) => ({
-          BASE_CURRENCY,
+          baseCurrency: BASE_CURRENCY,
           targetCurrency: rate.Cur_Abbreviation,
           validFrom,
           validTo,
