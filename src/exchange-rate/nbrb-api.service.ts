@@ -5,7 +5,8 @@ import type { NbrbApiRate } from './nbrb-api.types'
 
 @Injectable()
 export class NbrbApiService {
-  private readonly baseUrl = 'https://api.nbrb.by/exrates/rates'
+  private readonly NBRB_API_URL = 'https://api.nbrb.by/exrates/rates'
+  // For periodicity params check docs at https://www.nbrb.by/apihelp/exrates
   private readonly PERIODICITY_DAY = 0
   private readonly PERIODICITY_MONTH = 1
 
@@ -13,10 +14,10 @@ export class NbrbApiService {
     try {
       const [dayRatesResponse, monthRatesResponse] = await Promise.all([
         fetch(
-          `${this.baseUrl}?periodicity=${this.PERIODICITY_DAY}&ondate=${date}`,
+          `${this.NBRB_API_URL}?periodicity=${this.PERIODICITY_DAY}&ondate=${date}`,
         ),
         fetch(
-          `${this.baseUrl}?periodicity=${this.PERIODICITY_MONTH}&ondate=${date}`,
+          `${this.NBRB_API_URL}?periodicity=${this.PERIODICITY_MONTH}&ondate=${date}`,
         ),
       ])
 

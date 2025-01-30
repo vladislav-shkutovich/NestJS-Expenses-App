@@ -13,10 +13,12 @@ import type { ExchangeRate } from './schemas/exchange-rate.schema'
 
 @Injectable()
 export class ExchangeRateService implements OnApplicationBootstrap {
-  private readonly sourceOnBootstrap =
+  private readonly SOURCE_ON_BOOTSTRAP =
     'Missing exchange rates from the NBRB API on application bootstrap'
-  private readonly sourceOnCronJob =
+  private readonly SOURCE_ON_CRON =
     'Daily exchange rates from NBRB API at UTC 11:00:00'
+  private readonly VALIDITY_START_TIME = 'T11:00:00'
+  private readonly VALIDITY_END_TIME = 'T10:59:59.999'
 
   constructor(
     private readonly currencyService: CurrencyService,
@@ -25,12 +27,12 @@ export class ExchangeRateService implements OnApplicationBootstrap {
   ) {}
 
   async onApplicationBootstrap() {
-    await this.insertMissingRatesUpToCurrentDate(this.sourceOnBootstrap)
+    await this.insertMissingRatesUpToCurrentDate(this.SOURCE_ON_BOOTSTRAP)
   }
 
-  @Cron(CronExpression.EVERY_DAY_AT_2PM)
+  @Cron(CronExpression.EVERY_DAY_AT_11AM)
   async handleDailyExchangeRates() {
-    await this.insertMissingRatesUpToCurrentDate(this.sourceOnCronJob)
+    await this.insertMissingRatesUpToCurrentDate(this.SOURCE_ON_CRON)
   }
 
   async getExchangeRates(
@@ -99,8 +101,9 @@ export class ExchangeRateService implements OnApplicationBootstrap {
             ),
           )
 
-          const validFrom = new Date(`${date}T11:00:00`)
-          const validTo = new Date(`${date}T10:59:59.999`)
+          const validFrom = new Date(`${date}${this.VALIDITY_START_TIME}`)
+          const validTo = new Date(`${date}${this.VALIDITY_END_TIME}`)
+
           validTo.setDate(validTo.getDate() + 1)
 
           ratesOnDateRange.push(
