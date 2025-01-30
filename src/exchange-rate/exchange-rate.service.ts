@@ -99,8 +99,8 @@ export class ExchangeRateService implements OnApplicationBootstrap {
             ),
           )
 
-          const validFrom = new Date(`${date}T14:00:00`)
-          const validTo = new Date(`${date}T13:59:59.999`)
+          const validFrom = new Date(`${date}T11:00:00`)
+          const validTo = new Date(`${date}T10:59:59.999`)
           validTo.setDate(validTo.getDate() + 1)
 
           ratesOnDateRange.push(

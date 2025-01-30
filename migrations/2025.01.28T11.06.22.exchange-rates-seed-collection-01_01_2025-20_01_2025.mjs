@@ -1,6 +1,6 @@
 const baseCurrency = 'BYN'
 const source =
-  'NBRB API: Migration 2025.01.28T11.06.22.exchange-rates-seed-collection-01_01_2025-20_01_2025'
+  'Initial exchange rates from the NBRB API using migration 2025.01.28T11.06.22.exchange-rates-seed-collection-01_01_2025-20_01_2025'
 
 function getDateRange(dateFrom, dateTo) {
   const dateArray = []
@@ -62,8 +62,8 @@ export async function up({ context }) {
           ),
         )
 
-        const validFrom = new Date(`${date}T14:00:00`)
-        const validTo = new Date(`${date}T13:59:59.999`)
+        const validFrom = new Date(`${date}T11:00:00`)
+        const validTo = new Date(`${date}T10:59:59.999`)
         validTo.setDate(validTo.getDate() + 1)
 
         const formattedRatesOnDate = ratesOnDateByCurrencies.map((rate) => ({
@@ -80,7 +80,7 @@ export async function up({ context }) {
 
         ratesOnDateRange.push(...formattedRatesOnDate)
       } catch (error) {
-        console.error(`Error processing date ${date}:`, error)
+        throw new Error(`Error processing date ${date}:`, error)
       }
     }),
   )
