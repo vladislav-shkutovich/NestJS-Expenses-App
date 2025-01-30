@@ -8,6 +8,7 @@ import {
   InternalServerErrorException,
   NestInterceptor,
   NotFoundException,
+  ServiceUnavailableException,
   UnprocessableEntityException,
 } from '@nestjs/common'
 import { Observable, throwError } from 'rxjs'
@@ -15,6 +16,7 @@ import { catchError } from 'rxjs/operators'
 
 import {
   ConflictError,
+  ServiceUnavailableError,
   NotFoundError,
   UnprocessableError,
   ValidationError,
@@ -44,6 +46,11 @@ export class ErrorsInterceptor implements NestInterceptor {
           if (error instanceof UnprocessableError) {
             console.info(error)
             return new UnprocessableEntityException(error.message)
+          }
+
+          if (error instanceof ServiceUnavailableError) {
+            console.info(error)
+            return new ServiceUnavailableException(error.message)
           }
 
           if (error instanceof HttpException) {

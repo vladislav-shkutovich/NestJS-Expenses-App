@@ -1,0 +1,86 @@
+[
+  {
+    "code": "AMD",
+    "name": "Armenian Dram"
+  },
+  {
+    "code": "BGN",
+    "name": "Bulgarian Lev"
+  },
+  {
+    "code": "BYN",
+    "name": "Belarusian ruble"
+  },
+  {
+    "code": "CAD",
+    "name": "Canadian Dollar"
+  },
+  {
+    "code": "CHF",
+    "name": "Swiss Franc"
+  },
+  {
+    "code": "CNY",
+    "name": "Yuan China"
+  },
+  {
+    "code": "CZK",
+    "name": "Czech Koruna"
+  },
+  {
+    "code": "DKK",
+    "name": "Danish Krone"
+  },
+  {
+    "code": "EUR",
+    "name": "EURO"
+  },
+  {
+    "code": "GBP",
+    "name": "Pound Sterling"
+  },
+  {
+    "code": "GEL",
+    "name": "Georgian Lari"
+  },
+  {
+    "code": "HUF",
+    "name": "Forint"
+  },
+  {
+    "code": "JPY",
+    "name": "Yen"
+  },
+  {
+    "code": "KZT",
+    "name": "Kazakhstan Tenge"
+  },
+  {
+    "code": "MDL",
+    "name": "Moldovian Leu"
+  },
+  {
+    "code": "PLN",
+    "name": "Polish Zloty"
+  },
+  {
+    "code": "RON",
+    "name": "New Leu"
+  },
+  {
+    "code": "RUB",
+    "name": "Russian Ruble"
+  },
+  {
+    "code": "SEK",
+    "name": "Swedish Krona"
+  },
+  {
+    "code": "UAH",
+    "name": "Hryvnia"
+  },
+  {
+    "code": "USD",
+    "name": "US Dollar"
+  }
+]
