@@ -1,5 +1,7 @@
 FROM node:22.12.0-alpine AS base
 WORKDIR /app
+RUN apk add --no-cache tzdata
+ENV TZ=Europe/Minsk
 COPY package.json yarn.lock ./
 
 FROM base AS development

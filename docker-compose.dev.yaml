@@ -12,6 +12,7 @@ services:
     environment:
       NODE_ENV: development
       MONGODB_URI: mongodb://mongodb:27017
+      TZ: Europe/Minsk
     ports:
       - '3000:3000'
       - '9229:9229'

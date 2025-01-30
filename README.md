@@ -28,7 +28,7 @@
 $ yarn install
 ```
 
-## Running the app
+## Running the app (with Minsk timezone)
 
 ```bash
 # development
