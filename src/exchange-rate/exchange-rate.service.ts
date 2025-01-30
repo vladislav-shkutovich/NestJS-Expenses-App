@@ -1,4 +1,5 @@
 import { Injectable, OnApplicationBootstrap } from '@nestjs/common'
+import { Cron, CronExpression } from '@nestjs/schedule'
 
 import { BASE_CURRENCY } from '../common/constants/currency.constants'
 import { ServiceUnavailableError } from '../common/errors/errors'
@@ -13,7 +14,9 @@ import type { ExchangeRate } from './schemas/exchange-rate.schema'
 @Injectable()
 export class ExchangeRateService implements OnApplicationBootstrap {
   private readonly sourceOnBootstrap =
-    'NBRB API: Filling missing exchange rates on application bootstrap'
+    'Missing exchange rates from the NBRB API on application bootstrap'
+  private readonly sourceOnCronJob =
+    'Daily exchange rates from NBRB API at UTC 11:00:00'
 
   constructor(
     private readonly currencyService: CurrencyService,
@@ -22,32 +25,46 @@ export class ExchangeRateService implements OnApplicationBootstrap {
   ) {}
 
   async onApplicationBootstrap() {
-    const currentDate = new Date()
-    const latestDate = await this.exchangeRateDatabaseService.getLatestValidTo()
+    await this.insertMissingRatesUpToCurrentDate(this.sourceOnBootstrap)
+  }
 
-    if (latestDate > currentDate) {
-      console.debug('Exchange rates are up to date.')
-      return
-    } else {
-      console.debug(
-        `Exchange rates from ${toISODate(latestDate)} to ${toISODate(currentDate)} are missing.`,
-      )
-    }
-
-    const dateRange = this.getISODateRange(latestDate, currentDate)
-    const ratesOnDateRange = await this.processRatesOnDateRange(
-      dateRange,
-      this.sourceOnBootstrap,
-    )
-
-    await this.exchangeRateDatabaseService.insertExchangeRates(ratesOnDateRange)
-    console.debug(`Inserted ${ratesOnDateRange.length} exchange rate records.`)
+  @Cron(CronExpression.EVERY_DAY_AT_2PM)
+  async handleDailyExchangeRates() {
+    await this.insertMissingRatesUpToCurrentDate(this.sourceOnCronJob)
   }
 
   async getExchangeRates(
     options: ExchangeRateQueryParamsDto,
   ): Promise<ExchangeRate[]> {
     return await this.exchangeRateDatabaseService.getExchangeRates(options)
+  }
+
+  private async insertMissingRatesUpToCurrentDate(
+    source: string,
+  ): Promise<void> {
+    console.debug(`Checking for: ${source}...`)
+
+    const currentDate = new Date()
+    const latestDate = await this.exchangeRateDatabaseService.getLatestValidTo()
+
+    if (latestDate > currentDate) {
+      console.debug('Exchange rates are up to date.')
+      return
+    }
+
+    const dateRange = this.getISODateRange(latestDate, currentDate)
+
+    const ratesOnDateRange = await this.processRatesOnDateRange(
+      dateRange,
+      source,
+    )
+
+    const insertedRatesCount =
+      await this.exchangeRateDatabaseService.insertExchangeRates(
+        ratesOnDateRange,
+      )
+
+    console.debug(`Inserted ${insertedRatesCount} exchange rate records.`)
   }
 
   private getISODateRange(dateFrom: Date, dateTo: Date) {

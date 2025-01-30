@@ -24,8 +24,12 @@ export class ExchangeRateDatabaseService {
 
   async insertExchangeRates(
     createExchangeRatesContent: CreateExchangeRateContent[],
-  ): Promise<void> {
-    await this.exchangeRateModel.insertMany(createExchangeRatesContent)
+  ): Promise<number> {
+    const insertedExchangeRates = await this.exchangeRateModel.insertMany(
+      createExchangeRatesContent,
+    )
+
+    return insertedExchangeRates.length
   }
 
   async getLatestValidTo(): Promise<Date> {
