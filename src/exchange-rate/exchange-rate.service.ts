@@ -14,9 +14,8 @@ import type { ExchangeRate } from './schemas/exchange-rate.schema'
 @Injectable()
 export class ExchangeRateService implements OnApplicationBootstrap {
   private readonly SOURCE_ON_BOOTSTRAP =
-    'Missing exchange rates from the NBRB API on application bootstrap'
-  private readonly SOURCE_ON_CRON =
-    'Daily exchange rates from NBRB API at UTC 11:00:00'
+    'Missing exchange rates on application bootstrap'
+  private readonly SOURCE_ON_CRON = 'Daily exchange rates at UTC 11:00:00'
   private readonly VALIDITY_START_TIME = 'T11:00:00'
   private readonly VALIDITY_END_TIME = 'T10:59:59.999'
 

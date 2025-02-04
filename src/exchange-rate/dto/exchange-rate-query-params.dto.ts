@@ -9,8 +9,7 @@ export class ExchangeRateQueryParamsDto {
   @IsISO4217CurrencyCode()
   targetCurrency?: string
 
-  @IsOptional()
   @IsDate()
   @Type(() => Date)
-  date?: Date
+  date: Date
 }

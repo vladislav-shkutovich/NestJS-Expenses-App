@@ -2,7 +2,7 @@ const BASE_CURRENCY = 'BYN'
 const VALIDITY_START_TIME = 'T11:00:00'
 const VALIDITY_END_TIME = 'T10:59:59.999'
 const SOURCE_ON_MIGRATION =
-  'Initial exchange rates from the NBRB API using migration 2025.01.28T11.06.22.exchange-rates-seed-collection-01_01_2025-20_01_2025'
+  'Initial exchange rates using migration 2025.01.28T11.06.22.exchange-rates-seed-collection-01_01_2025-20_01_2025'
 const NBRB_API_URL = 'https://api.nbrb.by/exrates/rates'
 // For periodicity params check docs at https://www.nbrb.by/apihelp/exrates
 const PERIODICITY_DAY = 0

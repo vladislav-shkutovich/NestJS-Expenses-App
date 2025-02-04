@@ -19,9 +19,7 @@ export class ExchangeRateDatabaseService {
   async getExchangeRatesOnDate(
     options: ExchangeRateQueryParamsDto,
   ): Promise<ExchangeRate[]> {
-    const { date: specifiedDate, ...restOptions } = removeUndefined(options)
-
-    const date = specifiedDate || new Date()
+    const { date, ...restOptions } = removeUndefined(options)
 
     const query: FilterQuery<ExchangeRate> = {
       ...restOptions,

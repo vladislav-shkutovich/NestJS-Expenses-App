@@ -21,10 +21,20 @@ export class NbrbApiService {
         ),
       ])
 
-      if (!dayRatesResponse.ok || !monthRatesResponse.ok) {
-        throw new ServiceUnavailableError(
-          `Failed to fetch exchange rates for date ${date} from NBRB API`,
+      const errors: string[] = []
+      if (!dayRatesResponse.ok) {
+        errors.push(
+          `Day rates: ${dayRatesResponse.status} ${dayRatesResponse.statusText}`,
         )
+      }
+      if (!monthRatesResponse.ok) {
+        errors.push(
+          `Month rates: ${monthRatesResponse.status} ${monthRatesResponse.statusText}`,
+        )
+      }
+
+      if (errors.length > 0) {
+        throw new ServiceUnavailableError(errors.join(', '))
       }
 
       const [dayRates, monthRates] = await Promise.all([
@@ -35,7 +45,8 @@ export class NbrbApiService {
       return [...dayRates, ...monthRates]
     } catch (error) {
       throw new ServiceUnavailableError(
-        `Something went wrong while getting exchange rates for date ${date} from NBRB API`,
+        `Failed to fetch exchange rates for date ${date} from NBRB API.`,
+        { cause: error },
       )
     }
   }
