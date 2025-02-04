@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose'
 
 import { EXCHANGE_RATE_MODEL } from '../common/constants/database.constants'
 import { CurrencyModule } from '../currency/currency.module'
+import { EXCHANGE_RATE_ADAPTER } from './exchange-rate.constants'
 import { ExchangeRateController } from './exchange-rate.controller'
 import { ExchangeRateDatabaseService } from './exchange-rate.database.service'
 import { ExchangeRateService } from './exchange-rate.service'
@@ -17,6 +18,13 @@ import { ExchangeRateSchema } from './schemas/exchange-rate.schema'
     CurrencyModule,
   ],
   controllers: [ExchangeRateController],
-  providers: [NbrbApiService, ExchangeRateService, ExchangeRateDatabaseService],
+  providers: [
+    {
+      provide: EXCHANGE_RATE_ADAPTER,
+      useClass: NbrbApiService,
+    },
+    ExchangeRateService,
+    ExchangeRateDatabaseService,
+  ],
 })
 export class ExchangeRateModule {}

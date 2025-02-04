@@ -1,14 +1,14 @@
-import { Injectable, OnApplicationBootstrap } from '@nestjs/common'
+import { Inject, Injectable, OnApplicationBootstrap } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
 
-import { BASE_CURRENCY } from '../common/constants/currency.constants'
 import { ServiceUnavailableError } from '../common/errors/errors'
 import { toISODate } from '../common/utils/formatting.utils'
 import { CurrencyService } from '../currency/currency.service'
 import { ExchangeRateQueryParamsDto } from './dto/exchange-rate-query-params.dto'
+import { ExchangeRateAdapter } from './exchange-rate.adapter'
+import { EXCHANGE_RATE_ADAPTER } from './exchange-rate.constants'
 import { ExchangeRateDatabaseService } from './exchange-rate.database.service'
 import type { CreateExchangeRateContent } from './exchange-rate.types'
-import { NbrbApiService } from './nbrb-api.service'
 import type { ExchangeRate } from './schemas/exchange-rate.schema'
 
 @Injectable()
@@ -16,13 +16,12 @@ export class ExchangeRateService implements OnApplicationBootstrap {
   private readonly SOURCE_ON_BOOTSTRAP =
     'Missing exchange rates on application bootstrap'
   private readonly SOURCE_ON_CRON = 'Daily exchange rates at UTC 11:00:00'
-  private readonly VALIDITY_START_TIME = 'T11:00:00'
-  private readonly VALIDITY_END_TIME = 'T10:59:59.999'
 
   constructor(
     private readonly currencyService: CurrencyService,
     private readonly exchangeRateDatabaseService: ExchangeRateDatabaseService,
-    private readonly nbrbApiService: NbrbApiService,
+    @Inject(EXCHANGE_RATE_ADAPTER)
+    private readonly exchangeRateAdapter: ExchangeRateAdapter,
   ) {}
 
   async onApplicationBootstrap() {
@@ -94,30 +93,18 @@ export class ExchangeRateService implements OnApplicationBootstrap {
         try {
           console.debug(`Processing date: ${date}...`)
 
-          const ratesOnDate = await this.nbrbApiService.fetchRatesOnDate(date)
+          const ratesOnDate = await this.exchangeRateAdapter.fetchRatesOnDate(
+            date,
+            source,
+          )
 
           const ratesOnDateByCurrencies = ratesOnDate.filter((rate) =>
             currencies.some(
-              (currency) => currency.code === rate.Cur_Abbreviation,
+              (currency) => currency.code === rate.targetCurrency,
             ),
           )
 
-          const validFrom = new Date(`${date}${this.VALIDITY_START_TIME}`)
-          const validTo = new Date(`${date}${this.VALIDITY_END_TIME}`)
-
-          validTo.setDate(validTo.getDate() + 1)
-
-          ratesOnDateRange.push(
-            ...ratesOnDateByCurrencies.map((rate) => ({
-              baseCurrency: BASE_CURRENCY,
-              targetCurrency: rate.Cur_Abbreviation,
-              validFrom,
-              validTo,
-              rate: rate.Cur_OfficialRate,
-              source,
-              scale: rate.Cur_Scale,
-            })),
-          )
+          ratesOnDateRange.push(...ratesOnDateByCurrencies)
         } catch (error) {
           throw new ServiceUnavailableError(
             `Error processing exchange rates on date ${date}`,
