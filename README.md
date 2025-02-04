@@ -28,7 +28,7 @@
 $ yarn install
 ```
 
-## Running the app
+## Running the app (with UTC timezone)
 
 ```bash
 # development
@@ -57,7 +57,7 @@ $ yarn run test:e2e
 $ yarn run test:cov
 ```
 
-## Migrations
+## Migrations (with UTC timezone)
 
 #### Create a new migration template
 

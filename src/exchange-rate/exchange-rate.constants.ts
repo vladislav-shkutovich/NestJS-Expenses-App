@@ -1,0 +1,1 @@
+export const EXCHANGE_RATE_ADAPTER = Symbol('EXCHANGE_RATE_ADAPTER')

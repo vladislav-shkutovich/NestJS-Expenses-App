@@ -32,3 +32,10 @@ export class UnprocessableError extends Error {
     this.name = this.constructor.name
   }
 }
+
+export class ServiceUnavailableError extends Error {
+  constructor(...args: ConstructorParameters<typeof Error>) {
+    super(...args)
+    this.name = this.constructor.name
+  }
+}

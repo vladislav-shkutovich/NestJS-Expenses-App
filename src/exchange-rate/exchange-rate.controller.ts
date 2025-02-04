@@ -10,9 +10,9 @@ export class ExchangeRateController {
   constructor(private readonly exchangeRateService: ExchangeRateService) {}
 
   @Get()
-  async getExchangeRates(
+  async getExchangeRatesOnDate(
     @Query() query: ExchangeRateQueryParamsDto,
   ): Promise<ExchangeRate[]> {
-    return await this.exchangeRateService.getExchangeRates(query)
+    return await this.exchangeRateService.getExchangeRatesOnDate(query)
   }
 }

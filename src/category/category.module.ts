@@ -8,7 +8,6 @@ import { CategoryDatabaseService } from './category.database.service'
 import { CategoryService } from './category.service'
 import { CategorySchema } from './schemas/category.schema'
 
-// ! TODO: - Refactoring: rebuild app architecture to remove `forwardRef` usage in Category and Operation modules using a new SharedModule;
 @Module({
   imports: [
     MongooseModule.forFeature([

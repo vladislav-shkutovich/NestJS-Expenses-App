@@ -10,7 +10,6 @@ import { OperationDatabaseService } from './operation.database.service'
 import { OperationService } from './operation.service'
 import { OperationSchema } from './schemas/operation.schema'
 
-// ! TODO: - Refactoring: rebuild app architecture to remove `forwardRef` usage in Category and Operation modules using a new SharedModule;
 @Module({
   imports: [
     MongooseModule.forFeature([
