@@ -22,7 +22,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['migrations/**/*.mjs'],
+      files: ['migrations/**/*.mjs', 'cron-jobs/**/*.mjs'],
       parser: '@babel/eslint-parser',
       parserOptions: {
         requireConfigFile: false,
