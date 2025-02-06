@@ -1,5 +1,4 @@
 import { MongoClient } from 'mongodb'
-import 'dotenv/config'
 
 if (!process.env.MONGODB_URI) {
   throw new Error('MONGODB_URI environment variable is not set')
