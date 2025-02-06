@@ -1,10 +1,12 @@
-import 'dotenv/config'
 import { MongoClient } from 'mongodb'
+import 'dotenv/config'
 
 if (!process.env.MONGODB_URI) {
   throw new Error('MONGODB_URI environment variable is not set')
 }
 
+const CURRENCIES_COLLECTION = 'currencies'
+const EXCHANGE_RATES_COLLECTION = 'exchangerates'
 const BASE_CURRENCY = 'BYN'
 const VALIDITY_START_TIME = 'T11:00:00'
 const VALIDITY_END_TIME = 'T10:59:59.999'
@@ -12,6 +14,8 @@ const SOURCE_ON_CRON = 'Daily exchange rates at UTC 11:00:00'
 const NBRB_API_URL = 'https://api.nbrb.by/exrates/rates'
 const PERIODICITY_DAY = 0
 const PERIODICITY_MONTH = 1
+
+let exitCode = 0
 
 async function fetchRatesOnDate(date) {
   try {
@@ -85,38 +89,41 @@ async function main() {
   try {
     await client.connect()
     const db = client.db()
-    const currenciesCollection = db.collection('currencies')
-    const exchangeRatesCollection = db.collection('exchangerates')
 
-    const currentDate = new Date()
-    const latestRecord = await exchangeRatesCollection
+    const exchangeRatesCollection = db.collection(EXCHANGE_RATES_COLLECTION)
+    const latestRateRecord = await exchangeRatesCollection
       .find()
       .sort({ validTo: -1 })
       .limit(1)
       .toArray()
-
-    if (latestRecord.length === 0) {
+    if (latestRateRecord.length === 0) {
       throw new Error(
         'No exchange rates found in database. Run migrations first!',
       )
     }
 
-    const latestDate = latestRecord[0].validTo
+    const latestDate = latestRateRecord[0].validTo
+    const currentDate = new Date()
 
     if (latestDate > currentDate) {
       console.debug('Exchange rates are up to date.')
-      process.exit(0)
+      return
     }
 
+    const currenciesCollection = db.collection(CURRENCIES_COLLECTION)
     const currencies = await currenciesCollection.find().toArray()
-
-    const dateRange = getISODateRange(latestDate, currentDate)
+    if (currencies.length === 0) {
+      throw new Error('No currencies found in database. Run migrations first!')
+    }
 
     const ratesOnDateRange = []
+    const dateRange = getISODateRange(latestDate, currentDate)
+
     await Promise.all(
       dateRange.map(async (date) => {
         try {
           console.debug(`Processing date: ${date}...`)
+
           const ratesOnDate = await fetchRatesOnDate(date)
 
           const ratesOnDateByCurrencies = ratesOnDate.filter((rate) =>
@@ -127,7 +134,7 @@ async function main() {
 
           ratesOnDateRange.push(...ratesOnDateByCurrencies)
         } catch (error) {
-          console.error(`Error processing date ${date}:`, error)
+          throw new Error(`Error processing date.`, { cause: error })
         }
       }),
     )
@@ -138,16 +145,20 @@ async function main() {
         `Inserted ${ratesOnDateRange.length} exchange rate records.`,
       )
     } else {
-      console.debug('No new exchange rates to insert.')
+      throw new Error('No new exchange rates to insert.')
     }
   } catch (error) {
-    console.error('Error in main function:', error)
+    throw new Error(`Error in main function.`, { cause: error })
   } finally {
     await client.close()
   }
 }
 
-main().catch((error) => {
-  console.error('Unhandled error:', error)
-  process.exit(1)
-})
+main()
+  .catch((error) => {
+    exitCode = 1
+    console.error('Unhandled error.', { cause: error })
+  })
+  .finally(() => {
+    process.exit(exitCode)
+  })
