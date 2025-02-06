@@ -32,11 +32,9 @@ jobs:
       - name: Set up Cloud SDK
         uses: 'google-github-actions/setup-gcloud@v2'
 
-      - name: Deploy to Cloud Run
+      - name: Deploy to Cloud Run Jobs
         run: |
-          gcloud run deploy ${{ secrets.CRON_CLOUD_RUN_SERVICE_NAME }} \
+          gcloud run jobs create ${{ secrets.CRON_CLOUD_RUN_JOB_NAME }} \
             --image ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.CRON_DOCKERHUB_REPOSITORY }}:${{ github.event.inputs.tag }} \
-            --platform managed \
             --region ${{ secrets.CLOUD_RUN_REGION }} \
-            --no-allow-unauthenticated \
             --set-env-vars MONGODB_URI=${{ secrets.MONGODB_URI }}
