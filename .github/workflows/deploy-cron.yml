@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   deploy-cron:
-    name: Deploy Cron script to Cloud Run
+    name: Deploy Cron script to Cloud Run Jobs
     runs-on: ubuntu-latest
 
     steps:
