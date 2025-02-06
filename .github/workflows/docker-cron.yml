@@ -1,0 +1,33 @@
+name: Docker Cron
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Docker Image Tag'
+        required: true
+
+jobs:
+  build-and-push-docker:
+    name: Build and push Cron script Docker Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build Docker Image
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.CRON_DOCKERHUB_REPOSITORY }}:${{ github.event.inputs.tag }} -f ./cron-jobs/Dockerfile .
+          echo "Build Docker Image with tag ${{ github.event.inputs.tag }}"
+
+      - name: Push Docker Image
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.CRON_DOCKERHUB_REPOSITORY }}:${{ github.event.inputs.tag }}
+          echo "Push Docker Image with tag ${{ github.event.inputs.tag }}"
