@@ -1,5 +1,4 @@
 import { Inject, Injectable, OnApplicationBootstrap } from '@nestjs/common'
-import { Cron, CronExpression } from '@nestjs/schedule'
 
 import { ServiceUnavailableError } from '../common/errors/errors'
 import { toISODate } from '../common/utils/formatting.utils'
@@ -15,7 +14,6 @@ import type { ExchangeRate } from './schemas/exchange-rate.schema'
 export class ExchangeRateService implements OnApplicationBootstrap {
   private readonly SOURCE_ON_BOOTSTRAP =
     'Missing exchange rates on application bootstrap'
-  private readonly SOURCE_ON_CRON = 'Daily exchange rates at UTC 11:00:00'
 
   constructor(
     private readonly currencyService: CurrencyService,
@@ -26,11 +24,6 @@ export class ExchangeRateService implements OnApplicationBootstrap {
 
   async onApplicationBootstrap() {
     await this.insertMissingRatesUpToCurrentDate(this.SOURCE_ON_BOOTSTRAP)
-  }
-
-  @Cron(CronExpression.EVERY_DAY_AT_11AM)
-  async handleDailyExchangeRates() {
-    await this.insertMissingRatesUpToCurrentDate(this.SOURCE_ON_CRON)
   }
 
   async getExchangeRatesOnDate(
