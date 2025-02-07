@@ -24,7 +24,8 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.CRON_DOCKERHUB_REPOSITORY }}:${{ github.event.inputs.tag }} -f ./cron-jobs/Dockerfile .
+          cd cron-jobs
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.CRON_DOCKERHUB_REPOSITORY }}:${{ github.event.inputs.tag }} .
           echo "Build Docker Image with tag ${{ github.event.inputs.tag }}"
 
       - name: Push Docker Image
