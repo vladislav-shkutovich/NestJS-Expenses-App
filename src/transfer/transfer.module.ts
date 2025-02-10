@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose'
 
 import { AccountModule } from '../account/account.module'
 import { TRANSFER_MODEL } from '../common/constants/database.constants'
+import { SummaryModule } from '../summary/summary.module'
 import { TransactionModule } from '../transaction/transaction.module'
 import { TransferSchema } from './schemas/transfer.schema'
 import { TransferController } from './transfer.controller'
@@ -15,6 +16,7 @@ import { TransferService } from './transfer.service'
       { name: TRANSFER_MODEL, schema: TransferSchema },
     ]),
     AccountModule,
+    SummaryModule,
     TransactionModule,
   ],
   controllers: [TransferController],

@@ -3,6 +3,7 @@ import { Types } from 'mongoose'
 
 import { AccountService } from '../account/account.service'
 import { UnprocessableError } from '../common/errors/errors'
+import { SummaryService } from '../summary/summary.service'
 import { TransactionService } from '../transaction/transaction.service'
 import { CreateTransferDto } from './dto/create-transfer.dto'
 import { TransferQueryParamsDto } from './dto/transfer-query-params.dto'
@@ -15,6 +16,7 @@ import { CreateTransferContent, UpdateTransferContent } from './transfer.types'
 export class TransferService {
   constructor(
     private readonly accountService: AccountService,
+    private readonly summaryService: SummaryService,
     private readonly transactionService: TransactionService,
     private readonly transferDatabaseService: TransferDatabaseService,
   ) {}

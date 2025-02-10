@@ -13,5 +13,6 @@ import { SummaryService } from './summary.service'
   ],
   controllers: [SummaryController],
   providers: [SummaryService, SummaryDatabaseService],
+  exports: [SummaryService],
 })
 export class SummaryModule {}

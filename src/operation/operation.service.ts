@@ -4,6 +4,7 @@ import { FilterQuery, Types } from 'mongoose'
 import { AccountService } from '../account/account.service'
 import { CategoryService } from '../category/category.service'
 import { UnprocessableError } from '../common/errors/errors'
+import { SummaryService } from '../summary/summary.service'
 import { TransactionService } from '../transaction/transaction.service'
 import { CreateOperationDto } from './dto/create-operation.dto'
 import { OperationQueryParamsDto } from './dto/operation-query-params.dto'
@@ -14,10 +15,11 @@ import type { Operation } from './schemas/operation.schema'
 @Injectable()
 export class OperationService {
   constructor(
-    private readonly operationDatabaseService: OperationDatabaseService,
     private readonly accountService: AccountService,
     @Inject(forwardRef(() => CategoryService))
     private readonly categoryService: CategoryService,
+    private readonly operationDatabaseService: OperationDatabaseService,
+    private readonly summaryService: SummaryService,
     private readonly transactionService: TransactionService,
   ) {}
 
