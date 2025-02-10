@@ -10,7 +10,7 @@ export class SummaryService {
     private readonly summaryDatabaseService: SummaryDatabaseService,
   ) {}
 
-  async getSummariesByUser(options: SummaryQueryParamsDto): Promise<Summary[]> {
-    return await this.summaryDatabaseService.getSummariesByUser(options)
+  async getSummaries(options: SummaryQueryParamsDto): Promise<Summary[]> {
+    return await this.summaryDatabaseService.getSummaries(options)
   }
 }
