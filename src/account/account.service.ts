@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 
 import { Types } from 'mongoose'
 import { ConflictError, UnprocessableError } from '../common/errors/errors'
+import { SummaryService } from '../summary/summary.service'
 import { AccountDatabaseService } from './account.database.service'
 import { AccountType } from './account.types'
 import { AccountQueryParamsDto } from './dto/account-query-params.dto'
@@ -13,6 +14,7 @@ import type { Account } from './schemas/account.schema'
 export class AccountService {
   constructor(
     private readonly accountDatabaseService: AccountDatabaseService,
+    private readonly summaryService: SummaryService,
   ) {}
 
   // TODO: - Recalculate Summary which affected by adding a new Account;
