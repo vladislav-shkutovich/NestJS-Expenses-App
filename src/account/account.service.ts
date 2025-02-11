@@ -15,6 +15,7 @@ export class AccountService {
     private readonly accountDatabaseService: AccountDatabaseService,
   ) {}
 
+  // TODO: - Recalculate Summary which affected by adding a new Account;
   async createAccount(createAccountDto: CreateAccountDto): Promise<Account> {
     const { accountType, isSavings } = createAccountDto
 

@@ -79,6 +79,8 @@ export class OperationService {
         if (amount) {
           const amountDiff = amount - prevAmount
 
+          // TODO: - Check for operation type change (income or withdrawal) before choosing of totalIncome or totalExpense in summary on operation update;
+
           await this.accountService.updateAccountBalanceByAmount(
             accountId,
             userId,

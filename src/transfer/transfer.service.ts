@@ -121,6 +121,8 @@ export class TransferService {
 
           const fromAmountDiff = fromAmount - prevFromAmount
 
+          // TODO: - Check for operation type change (income or withdrawal) before choosing of totalIncome or totalExpense in summary on transfer update;
+
           await this.accountService.updateAccountBalanceByAmount(
             fromAccountId,
             userId,
