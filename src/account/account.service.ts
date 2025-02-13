@@ -27,7 +27,18 @@ export class AccountService {
       )
     }
 
-    return await this.accountDatabaseService.createAccount(createAccountDto)
+    const createdAccount =
+      await this.accountDatabaseService.createAccount(createAccountDto)
+
+    const { _id: accountId, createdAt, currencyCode } = createdAccount
+
+    await this.summaryService.processSummariesOnAccountCreate({
+      accountId,
+      createdAt,
+      currencyCode,
+    })
+
+    return createdAccount
   }
 
   async getAccount(

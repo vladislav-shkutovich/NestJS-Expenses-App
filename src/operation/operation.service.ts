@@ -28,7 +28,7 @@ export class OperationService {
     createOperationDto: CreateOperationDto,
   ): Promise<Operation> {
     return await this.transactionService.executeInTransaction(async () => {
-      const { accountId, userId, categoryId, amount } = createOperationDto
+      const { accountId, userId, categoryId, amount, date } = createOperationDto
 
       const { currencyCode } =
         await this.accountService.updateAccountBalanceByAmount(
@@ -38,6 +38,13 @@ export class OperationService {
         )
 
       await this.validateOperationCategory(categoryId, userId)
+
+      await this.summaryService.processSummariesOnOperationCreateDelete({
+        accountId,
+        currencyCode,
+        date,
+        amount,
+      })
 
       return await this.operationDatabaseService.createOperation({
         ...createOperationDto,
@@ -58,6 +65,7 @@ export class OperationService {
   }
 
   // TODO: - Recalculate Summary which affected by Operation date and amount on update operation;
+  // TODO: - Check for operation type change (income or withdrawal) before choosing of totalIncome or totalExpense in summary on operation update;
   async updateOperation(
     id: Types.ObjectId,
     userId: Types.ObjectId,
@@ -103,14 +111,23 @@ export class OperationService {
     userId: Types.ObjectId,
   ): Promise<void> {
     return await this.transactionService.executeInTransaction(async () => {
-      const { accountId, amount } = await this.getOperation(id, userId)
+      const { accountId, amount, date } = await this.getOperation(id, userId)
 
-      // "-" sign before amount is required, since it's necessary to reduce the account balance by its value
-      await this.accountService.updateAccountBalanceByAmount(
+      // "-" sign before amounts is required, since it's necessary to reduce the account balance by its value
+
+      const { currencyCode } =
+        await this.accountService.updateAccountBalanceByAmount(
+          accountId,
+          userId,
+          -amount,
+        )
+
+      await this.summaryService.processSummariesOnOperationCreateDelete({
         accountId,
-        userId,
-        -amount,
-      )
+        currencyCode,
+        date,
+        amount: -amount,
+      })
 
       return await this.operationDatabaseService.deleteOperation(id, userId)
     })
