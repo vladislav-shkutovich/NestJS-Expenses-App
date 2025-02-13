@@ -6,9 +6,9 @@ import { CategoryService } from '../category/category.service'
 import { UnprocessableError } from '../common/errors/errors'
 import { SummaryService } from '../summary/summary.service'
 import { TransactionService } from '../transaction/transaction.service'
-import { CreateOperationDto } from './dto/create-operation.dto'
-import { OperationQueryParamsDto } from './dto/operation-query-params.dto'
-import { UpdateOperationDto } from './dto/update-operation.dto'
+import type { CreateOperationDto } from './dto/create-operation.dto'
+import type { OperationQueryParamsDto } from './dto/operation-query-params.dto'
+import type { UpdateOperationDto } from './dto/update-operation.dto'
 import { OperationDatabaseService } from './operation.database.service'
 import type { Operation } from './schemas/operation.schema'
 
@@ -30,14 +30,14 @@ export class OperationService {
     return await this.transactionService.executeInTransaction(async () => {
       const { accountId, userId, categoryId, amount, date } = createOperationDto
 
+      await this.validateOperationCategory(categoryId, userId)
+
       const { currencyCode } =
         await this.accountService.updateAccountBalanceByAmount(
           accountId,
           userId,
           amount,
         )
-
-      await this.validateOperationCategory(categoryId, userId)
 
       await this.summaryService.processSummariesOnOperationCreateDelete({
         accountId,
@@ -72,29 +72,38 @@ export class OperationService {
     updateOperationDto: UpdateOperationDto,
   ): Promise<Operation> {
     return await this.transactionService.executeInTransaction(async () => {
-      const { categoryId, amount } = updateOperationDto
+      const { categoryId, amount, date } = updateOperationDto
 
-      if (categoryId || amount) {
-        const { accountId, amount: prevAmount } = await this.getOperation(
-          id,
-          userId,
-        )
+      if (categoryId) {
+        await this.validateOperationCategory(categoryId, userId)
+      }
 
-        if (categoryId) {
-          await this.validateOperationCategory(categoryId, userId)
-        }
+      if (amount || date) {
+        const {
+          accountId,
+          currencyCode,
+          date: prevDate,
+          amount: prevAmount,
+        } = await this.getOperation(id, userId)
 
-        if (amount) {
-          const amountDiff = amount - prevAmount
+        const amountDiff = amount ? amount - prevAmount : 0
 
-          // TODO: - Check for operation type change (income or withdrawal) before choosing of totalIncome or totalExpense in summary on operation update;
-
+        if (amountDiff) {
           await this.accountService.updateAccountBalanceByAmount(
             accountId,
             userId,
             amountDiff,
           )
         }
+
+        await this.summaryService.processSummariesOnOperationUpdate({
+          accountId,
+          currencyCode,
+          prevAmount,
+          nextAmount: amount ?? prevAmount,
+          prevDate,
+          nextDate: date ?? prevDate,
+        })
       }
 
       return await this.operationDatabaseService.updateOperation(
@@ -111,16 +120,18 @@ export class OperationService {
     userId: Types.ObjectId,
   ): Promise<void> {
     return await this.transactionService.executeInTransaction(async () => {
-      const { accountId, amount, date } = await this.getOperation(id, userId)
+      const { accountId, currencyCode, amount, date } = await this.getOperation(
+        id,
+        userId,
+      )
 
       // "-" sign before amounts is required, since it's necessary to reduce the account balance by its value
 
-      const { currencyCode } =
-        await this.accountService.updateAccountBalanceByAmount(
-          accountId,
-          userId,
-          -amount,
-        )
+      await this.accountService.updateAccountBalanceByAmount(
+        accountId,
+        userId,
+        -amount,
+      )
 
       await this.summaryService.processSummariesOnOperationCreateDelete({
         accountId,

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 
-import { SummaryQueryParamsDto } from './dto/summary-query-params.dto'
+import type { SummaryQueryParamsDto } from './dto/summary-query-params.dto'
 import type { Summary } from './schemas/summary.schema'
 import { SummaryDatabaseService } from './summary.database.service'
 import type {
