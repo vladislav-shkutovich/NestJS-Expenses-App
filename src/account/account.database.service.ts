@@ -18,7 +18,11 @@ export class AccountDatabaseService {
   ) {}
 
   async createAccount(createAccountDto: CreateAccountDto): Promise<Account> {
-    const createdAccount = await this.accountModel.create(createAccountDto)
+    const session = getSession()
+
+    const accountDoc = new this.accountModel(createAccountDto)
+    const createdAccount = await accountDoc.save({ session })
+
     return createdAccount.toObject()
   }
 
@@ -41,8 +45,13 @@ export class AccountDatabaseService {
   }
 
   async getAccounts(options: AccountQueryParamsDto): Promise<Account[]> {
+    const session = getSession()
+
     const filteredOptions = removeUndefined(options)
-    return await this.accountModel.find(filteredOptions).lean()
+
+    return await this.accountModel
+      .find(filteredOptions, null, { session })
+      .lean()
   }
 
   async updateAccount(

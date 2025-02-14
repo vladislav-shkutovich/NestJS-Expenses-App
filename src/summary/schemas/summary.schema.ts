@@ -4,12 +4,12 @@ import { Types } from 'mongoose'
 import { USER_MODEL } from '../../common/constants/database.constants'
 
 @Schema({ _id: false })
-class Totals {
+export class Totals {
   @Prop({ required: true })
-  startingBalances: number
+  startingBalance: number
 
   @Prop({ required: true })
-  endingBalances: number
+  endingBalance: number
 
   @Prop({ required: true })
   totalIncome: number
@@ -21,7 +21,7 @@ class Totals {
 const TotalsSchema = SchemaFactory.createForClass(Totals)
 
 @Schema({ _id: false })
-class AccountEntry {
+export class AccountEntry {
   @Prop({ type: TotalsSchema, required: true })
   totals: Totals
 }
@@ -29,7 +29,7 @@ class AccountEntry {
 export const AccountEntrySchema = SchemaFactory.createForClass(AccountEntry)
 
 @Schema({ _id: false })
-class CurrencyEntry {
+export class CurrencyEntry {
   @Prop({ type: TotalsSchema, required: true })
   totals: Totals
 

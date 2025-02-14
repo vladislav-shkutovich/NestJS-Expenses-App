@@ -40,6 +40,7 @@ export class OperationService {
         )
 
       await this.summaryService.processSummariesOnOperationCreateDelete({
+        userId,
         accountId,
         currencyCode,
         date,
@@ -97,6 +98,7 @@ export class OperationService {
         }
 
         await this.summaryService.processSummariesOnOperationUpdate({
+          userId,
           accountId,
           currencyCode,
           prevAmount,
@@ -134,6 +136,7 @@ export class OperationService {
       )
 
       await this.summaryService.processSummariesOnOperationCreateDelete({
+        userId,
         accountId,
         currencyCode,
         date,

@@ -1,6 +1,7 @@
-import { Module } from '@nestjs/common'
+import { forwardRef, Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
 
+import { AccountModule } from '../account/account.module'
 import { SUMMARY_MODEL } from '../common/constants/database.constants'
 import { SummarySchema } from './schemas/summary.schema'
 import { SummaryController } from './summary.controller'
@@ -10,6 +11,7 @@ import { SummaryService } from './summary.service'
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: SUMMARY_MODEL, schema: SummarySchema }]),
+    forwardRef(() => AccountModule),
   ],
   controllers: [SummaryController],
   providers: [SummaryService, SummaryDatabaseService],

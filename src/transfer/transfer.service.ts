@@ -58,12 +58,14 @@ export class TransferService {
 
       await Promise.all([
         await this.summaryService.processSummariesOnTransferCreateDelete({
+          userId,
           accountId: fromAccountId,
           currencyCode: fromCurrencyCode,
           date,
           amount: fromAmount,
         }),
         await this.summaryService.processSummariesOnTransferCreateDelete({
+          userId,
           accountId: toAccountId,
           currencyCode: toCurrencyCode,
           date,
@@ -160,6 +162,7 @@ export class TransferService {
           }
 
           await this.summaryService.processSummariesOnTransferUpdate({
+            userId,
             accountId: fromAccountId,
             currencyCode: fromCurrencyCode,
             prevAmount: prevFromAmount,
@@ -186,6 +189,7 @@ export class TransferService {
           }
 
           await this.summaryService.processSummariesOnTransferUpdate({
+            userId,
             accountId: toAccountId,
             currencyCode: toCurrencyCode,
             prevAmount: prevToAmount,
@@ -241,12 +245,14 @@ export class TransferService {
 
       await Promise.all([
         await this.summaryService.processSummariesOnTransferCreateDelete({
+          userId,
           accountId: fromAccountId,
           currencyCode: fromCurrencyCode,
           date,
           amount: -fromAmount,
         }),
         await this.summaryService.processSummariesOnTransferCreateDelete({
+          userId,
           accountId: toAccountId,
           currencyCode: toCurrencyCode,
           date,

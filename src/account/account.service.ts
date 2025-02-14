@@ -1,44 +1,50 @@
-import { Injectable } from '@nestjs/common'
-
+import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { Types } from 'mongoose'
+
 import { ConflictError, UnprocessableError } from '../common/errors/errors'
 import { SummaryService } from '../summary/summary.service'
+import { TransactionService } from '../transaction/transaction.service'
 import { AccountDatabaseService } from './account.database.service'
 import { AccountType } from './account.types'
-import { AccountQueryParamsDto } from './dto/account-query-params.dto'
-import { CreateAccountDto } from './dto/create-account.dto'
-import { UpdateAccountDto } from './dto/update-account.dto'
+import type { AccountQueryParamsDto } from './dto/account-query-params.dto'
+import type { CreateAccountDto } from './dto/create-account.dto'
+import type { UpdateAccountDto } from './dto/update-account.dto'
 import type { Account } from './schemas/account.schema'
 
 @Injectable()
 export class AccountService {
   constructor(
     private readonly accountDatabaseService: AccountDatabaseService,
+    @Inject(forwardRef(() => SummaryService))
     private readonly summaryService: SummaryService,
+    private readonly transactionService: TransactionService,
   ) {}
 
   // TODO: - Recalculate Summary which affected by adding a new Account;
   async createAccount(createAccountDto: CreateAccountDto): Promise<Account> {
-    const { accountType, isSavings } = createAccountDto
+    return await this.transactionService.executeInTransaction(async () => {
+      const { userId, accountType, isSavings } = createAccountDto
 
-    if (accountType === AccountType.LOAN && isSavings) {
-      throw new UnprocessableError(
-        'Loan account type cannot be marked as savings',
-      )
-    }
+      if (accountType === AccountType.LOAN && isSavings) {
+        throw new UnprocessableError(
+          'Loan account type cannot be marked as savings',
+        )
+      }
 
-    const createdAccount =
-      await this.accountDatabaseService.createAccount(createAccountDto)
+      const createdAccount =
+        await this.accountDatabaseService.createAccount(createAccountDto)
 
-    const { _id: accountId, createdAt, currencyCode } = createdAccount
+      const { _id: accountId, createdAt, currencyCode } = createdAccount
 
-    await this.summaryService.processSummariesOnAccountCreate({
-      accountId,
-      createdAt,
-      currencyCode,
+      await this.summaryService.processSummariesOnAccountCreate({
+        userId,
+        accountId,
+        createdAt,
+        currencyCode,
+      })
+
+      return createdAccount
     })
-
-    return createdAccount
   }
 
   async getAccount(
