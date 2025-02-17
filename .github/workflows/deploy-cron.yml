@@ -1,0 +1,40 @@
+name: Deploy Cron
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Docker Image Tag to Deploy Cron script'
+        required: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy-cron:
+    name: Deploy Cron script to Cloud Run Jobs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Google Cloud Auth
+        uses: 'google-github-actions/auth@v1'
+        with:
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set Project Id
+        run: gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Set up Cloud SDK
+        uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: Deploy to Cloud Run Jobs
+        run: |
+          gcloud run jobs deploy ${{ secrets.CRON_CLOUD_RUN_JOB_NAME }} \
+            --image ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.CRON_DOCKERHUB_REPOSITORY }}:${{ github.event.inputs.tag }} \
+            --region ${{ secrets.CLOUD_RUN_REGION }} \
+            --set-env-vars MONGODB_URI=${{ secrets.MONGODB_URI }}
