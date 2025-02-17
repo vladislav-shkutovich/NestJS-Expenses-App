@@ -2,7 +2,7 @@
   "name": "cron-jobs",
   "version": "1.0.0",
   "description": "Cloud Run Function for filling daily exchange rates",
-  "main": "index.js",
+  "main": "index.mjs",
   "scripts": {
     "start": "TZ='UTC' node index.mjs"
   },

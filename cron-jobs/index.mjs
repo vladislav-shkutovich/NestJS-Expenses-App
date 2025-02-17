@@ -101,10 +101,10 @@ async function main() {
       )
     }
 
-    const latestDate = latestRateRecord[0].validTo
+    const latestDate = new Date(latestRateRecord[0].validTo)
     const currentDate = new Date()
 
-    if (latestDate > currentDate) {
+    if (latestDate.getTime() > currentDate.getTime()) {
       console.debug('Exchange rates are up to date.')
       return
     }

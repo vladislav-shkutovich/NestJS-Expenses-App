@@ -1,8 +1,8 @@
-FROM node:22.12.0-alpine AS base
+FROM node:22.14.0-alpine AS base
 WORKDIR /app
 COPY package.json yarn.lock ./
 
 FROM base AS executor
-RUN yarn install --frozen-lockfile
+RUN yarn install --frozen-lockfile --production
 COPY . .
-CMD ["yarn", "start"]
+CMD ["node", "index.mjs"]
