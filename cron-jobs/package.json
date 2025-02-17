@@ -1,0 +1,12 @@
+{
+  "name": "cron-jobs",
+  "version": "1.0.0",
+  "description": "Cloud Run Function for filling daily exchange rates",
+  "main": "index.mjs",
+  "scripts": {
+    "start": "TZ='UTC' node index.mjs"
+  },
+  "dependencies": {
+    "mongodb": "^6.13.0"
+  }
+}
