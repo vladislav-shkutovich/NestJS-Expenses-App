@@ -34,7 +34,7 @@ jobs:
 
       - name: Deploy to Cloud Run Jobs
         run: |
-          gcloud run jobs create ${{ secrets.CRON_CLOUD_RUN_JOB_NAME }} \
+          gcloud run jobs deploy ${{ secrets.CRON_CLOUD_RUN_JOB_NAME }} \
             --image ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.CRON_DOCKERHUB_REPOSITORY }}:${{ github.event.inputs.tag }} \
             --region ${{ secrets.CLOUD_RUN_REGION }} \
             --set-env-vars MONGODB_URI=${{ secrets.MONGODB_URI }}
