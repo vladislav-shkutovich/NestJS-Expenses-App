@@ -53,7 +53,7 @@ export class Summary {
   dateTo: Date
 
   @Prop({ type: Map, of: AccountEntrySchema, required: true })
-  accounts: Map<string, AccountEntry>
+  accounts: Map<Types.ObjectId, AccountEntry>
 
   @Prop({ type: Map, of: CurrencyEntrySchema, required: true })
   currencies: Map<string, CurrencyEntry>
