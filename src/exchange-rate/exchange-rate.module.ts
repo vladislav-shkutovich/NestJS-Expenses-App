@@ -26,5 +26,6 @@ import { ExchangeRateSchema } from './schemas/exchange-rate.schema'
     ExchangeRateService,
     ExchangeRateDatabaseService,
   ],
+  exports: [ExchangeRateService],
 })
 export class ExchangeRateModule {}

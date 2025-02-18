@@ -1,7 +1,6 @@
 import {
   IsBoolean,
   IsEnum,
-  IsInt,
   IsISO4217CurrencyCode,
   IsNotEmpty,
   IsOptional,
@@ -31,8 +30,4 @@ export class CreateAccountDto {
   @IsBoolean()
   @IsOptional()
   isSavings?: boolean
-
-  @IsInt()
-  @IsOptional()
-  balance?: number
 }

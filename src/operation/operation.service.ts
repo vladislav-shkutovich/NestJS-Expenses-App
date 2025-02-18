@@ -4,20 +4,22 @@ import { FilterQuery, Types } from 'mongoose'
 import { AccountService } from '../account/account.service'
 import { CategoryService } from '../category/category.service'
 import { UnprocessableError } from '../common/errors/errors'
+import { SummaryService } from '../summary/summary.service'
 import { TransactionService } from '../transaction/transaction.service'
-import { CreateOperationDto } from './dto/create-operation.dto'
-import { OperationQueryParamsDto } from './dto/operation-query-params.dto'
-import { UpdateOperationDto } from './dto/update-operation.dto'
+import type { CreateOperationDto } from './dto/create-operation.dto'
+import type { OperationQueryParamsDto } from './dto/operation-query-params.dto'
+import type { UpdateOperationDto } from './dto/update-operation.dto'
 import { OperationDatabaseService } from './operation.database.service'
 import type { Operation } from './schemas/operation.schema'
 
 @Injectable()
 export class OperationService {
   constructor(
-    private readonly operationDatabaseService: OperationDatabaseService,
     private readonly accountService: AccountService,
     @Inject(forwardRef(() => CategoryService))
     private readonly categoryService: CategoryService,
+    private readonly operationDatabaseService: OperationDatabaseService,
+    private readonly summaryService: SummaryService,
     private readonly transactionService: TransactionService,
   ) {}
 
@@ -26,7 +28,9 @@ export class OperationService {
     createOperationDto: CreateOperationDto,
   ): Promise<Operation> {
     return await this.transactionService.executeInTransaction(async () => {
-      const { accountId, userId, categoryId, amount } = createOperationDto
+      const { accountId, userId, categoryId, amount, date } = createOperationDto
+
+      await this.validateOperationCategory(categoryId, userId)
 
       const { currencyCode } =
         await this.accountService.updateAccountBalanceByAmount(
@@ -35,7 +39,13 @@ export class OperationService {
           amount,
         )
 
-      await this.validateOperationCategory(categoryId, userId)
+      await this.summaryService.processSummariesOnOperationCreateDelete({
+        userId,
+        accountId,
+        currencyCode,
+        date,
+        amount,
+      })
 
       return await this.operationDatabaseService.createOperation({
         ...createOperationDto,
@@ -56,33 +66,46 @@ export class OperationService {
   }
 
   // TODO: - Recalculate Summary which affected by Operation date and amount on update operation;
+  // TODO: - Check for operation type change (income or withdrawal) before choosing of totalIncome or totalExpense in summary on operation update;
   async updateOperation(
     id: Types.ObjectId,
     userId: Types.ObjectId,
     updateOperationDto: UpdateOperationDto,
   ): Promise<Operation> {
     return await this.transactionService.executeInTransaction(async () => {
-      const { categoryId, amount } = updateOperationDto
+      const { categoryId, amount, date } = updateOperationDto
 
-      if (categoryId || amount) {
-        const { accountId, amount: prevAmount } = await this.getOperation(
-          id,
-          userId,
-        )
+      if (categoryId) {
+        await this.validateOperationCategory(categoryId, userId)
+      }
 
-        if (categoryId) {
-          await this.validateOperationCategory(categoryId, userId)
-        }
+      if (amount || date) {
+        const {
+          accountId,
+          currencyCode,
+          date: prevDate,
+          amount: prevAmount,
+        } = await this.getOperation(id, userId)
 
-        if (amount) {
-          const amountDiff = amount - prevAmount
+        const amountDiff = amount ? amount - prevAmount : 0
 
+        if (amountDiff) {
           await this.accountService.updateAccountBalanceByAmount(
             accountId,
             userId,
             amountDiff,
           )
         }
+
+        await this.summaryService.processSummariesOnOperationUpdate({
+          userId,
+          accountId,
+          currencyCode,
+          prevAmount,
+          nextAmount: amount ?? prevAmount,
+          prevDate,
+          nextDate: date ?? prevDate,
+        })
       }
 
       return await this.operationDatabaseService.updateOperation(
@@ -99,14 +122,26 @@ export class OperationService {
     userId: Types.ObjectId,
   ): Promise<void> {
     return await this.transactionService.executeInTransaction(async () => {
-      const { accountId, amount } = await this.getOperation(id, userId)
+      const { accountId, currencyCode, amount, date } = await this.getOperation(
+        id,
+        userId,
+      )
 
-      // "-" sign before amount is required, since it's necessary to reduce the account balance by its value
+      // "-" sign before amounts is required, since it's necessary to reduce the account balance by its value
+
       await this.accountService.updateAccountBalanceByAmount(
         accountId,
         userId,
         -amount,
       )
+
+      await this.summaryService.processSummariesOnOperationCreateDelete({
+        userId,
+        accountId,
+        currencyCode,
+        date,
+        amount: -amount,
+      })
 
       return await this.operationDatabaseService.deleteOperation(id, userId)
     })
