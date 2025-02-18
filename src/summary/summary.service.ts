@@ -19,6 +19,9 @@ import type {
   SummaryOnTransactionCreateDeleteParams,
   SummaryOnTransactionUpdateParams,
 } from './summary.types'
+import { NotFoundError } from '../common/errors/errors'
+
+// TODO: - Add a better typing for current summaries methods;
 
 @Injectable()
 export class SummaryService {
@@ -33,16 +36,11 @@ export class SummaryService {
     return await this.summaryDatabaseService.getSummaries(options)
   }
 
+  // TODO: - Refactor `createSummary` method to reduce calculations;
   private async createSummary(
     userId: Types.ObjectId,
     date: Date,
   ): Promise<CreateSummaryContent> {
-    // * get dateFrom/dateTo fields
-    // * get all user accounts
-    // * fill accounts map
-    // * full currencies map (totals)
-    // todo: fill currencies map (convertedTotals)
-
     const accounts = await this.accountService.getAccounts({ userId })
     const currencies = [
       ...new Set(accounts.map(({ currencyCode }) => currencyCode)),
@@ -72,14 +70,14 @@ export class SummaryService {
         (convertedBalances, currency) => ({
           ...convertedBalances,
           [currency]: Object.entries(balancesPerCurrency).reduce(
-            (sum, [balanceCurrency, balance]) => {
+            (sum, [balanceCurrency, balanceValue]) => {
               return (
                 sum +
-                this.convertAmountByCurrency({
-                  amount: balance,
-                  baseCurrency: currency,
-                  targetCurrency: balanceCurrency,
-                  rates: exchangeRates,
+                this.convertAmountIntoCurrency({
+                  amount: balanceValue,
+                  fromCurrency: balanceCurrency,
+                  intoCurrency: currency,
+                  exchangeRates,
                 })
               )
             },
@@ -89,8 +87,8 @@ export class SummaryService {
         {},
       )
 
-    const accountsMap = accounts.reduce((map, { _id: id, balance }) => {
-      return map.set(id, {
+    const accountsMap = accounts.reduce((map, { _id, balance }) => {
+      return map.set(_id, {
         totals: {
           startingBalance: balance,
           endingBalance: balance,
@@ -169,20 +167,55 @@ export class SummaryService {
     throw new Error('processSummariesOnTransferUpdate in not implemented')
   }
 
-  // ! convertAmountByCurrency is not implemented yet
-  private convertAmountByCurrency({
+  // TODO: - Refactor `convertAmountIntoCurrency` helper to reduce calculations;
+  private convertAmountIntoCurrency({
     amount,
-    baseCurrency,
-    targetCurrency,
-    rates,
+    fromCurrency,
+    intoCurrency,
+    exchangeRates,
   }: {
     amount: number
-    baseCurrency: string
-    targetCurrency: string
-    rates: ExchangeRate[]
+    fromCurrency: string
+    intoCurrency: string
+    exchangeRates: ExchangeRate[]
   }): number {
-    console.log(amount, baseCurrency, targetCurrency, rates)
+    if (fromCurrency === intoCurrency) return amount
 
-    return amount * 1
+    const baseExchangeRate = {
+      rate: 1,
+      scale: 1,
+    }
+
+    const getRateByCurrency = (currency: string) => {
+      const exchangeRate = exchangeRates.find(
+        ({ targetCurrency }) => targetCurrency === currency,
+      )
+
+      if (!exchangeRate)
+        throw new NotFoundError(
+          `Exchange rate for ${currency} not found. Failed to process summary.`,
+        )
+
+      return {
+        rate: exchangeRate.rate,
+        scale: exchangeRate.scale,
+      }
+    }
+
+    const fromExchangeRate =
+      fromCurrency === BASE_CURRENCY
+        ? baseExchangeRate
+        : getRateByCurrency(fromCurrency)
+
+    const intoExchangeRate =
+      intoCurrency === BASE_CURRENCY
+        ? baseExchangeRate
+        : getRateByCurrency(intoCurrency)
+
+    const convertedAmount =
+      (amount * fromExchangeRate.rate * intoExchangeRate.scale) /
+      (fromExchangeRate.scale * intoExchangeRate.rate)
+
+    return Math.round(convertedAmount)
   }
 }
